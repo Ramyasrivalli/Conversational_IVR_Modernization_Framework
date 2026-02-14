@@ -1,3 +1,6 @@
+## Internship Milestone Submission – Milestone 1
+
+This repository contains the complete system analysis and requirement documentation for the modernization of legacy VXML-based IVR systems using Conversational AI platforms.
 # Conversational IVR Modernization Framework
 
 
