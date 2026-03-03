@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-#IRCTC-Conversational-IVR-Modernization-Framework
+Conversational-IVR-Modernization-Framework
 An IVR model that uses speach to text recognition and uses AI to modernise the old existing IVR system
 =======
 ## Internship Milestone Submission – Milestone 1
@@ -87,5 +86,4 @@ Conversational_IVR_Modernization_Framework/
 ## 7. License
 
 This project is licensed under the MIT License.
-See the LICENSE file for details.
->>>>>>> f46e9683a4f861a90a99419dd57d0c86320ebcda
+
