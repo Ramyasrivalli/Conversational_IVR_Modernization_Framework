@@ -1,4 +1,3 @@
-# Conversational IVR Modernization Framework
 ## Milestone 1 – Legacy System Analysis and Requirements Gathering
 
 **Name:**  Mutyala Ramya srivalli
