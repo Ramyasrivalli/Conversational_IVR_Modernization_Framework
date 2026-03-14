@@ -43,3 +43,12 @@ Users can call the system and request:
 - Train Schedule
 - Ticket Booking Info
 - Ticket Cancellation
+
+  The application is running locally. Here are the relevant links:
+
+- **FastAPI Server**: http://localhost:8000
+- **Health Check**: http://localhost:8000/health
+- **IVR Simulator UI**: http://localhost:8000/ (served by the FastAPI app)
+- **Local HTML File**: irctc_ui.html
+
+## You can access the IRCTC Smart IVR interface by opening http://localhost:8000 in your browser
