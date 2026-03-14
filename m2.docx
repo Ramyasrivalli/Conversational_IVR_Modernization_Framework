@@ -1,0 +1,172 @@
+🚂 Conversational IVR Modernization Framework
+📌 Milestone 2 Documentation — Integration Layer Development
+1️⃣ Introduction
+
+Milestone 2 focuses on the development of the Integration Layer, which acts as a middleware bridge between legacy IVR systems and modern conversational AI platforms.
+
+Traditional IVR systems operate using static DTMF-based interaction models that limit user flexibility and increase navigation complexity. The objective of this milestone is to design and implement a scalable middleware framework that enables real-time interaction handling, session management, and seamless communication between user interfaces and conversational engines.
+
+This milestone delivers a fully functional REST API-based backend integrated with a web-based IVR simulator, demonstrating structured communication flow and state-driven interaction handling.
+
+2️⃣ Objectives of Milestone 2
+
+The primary objectives achieved in this milestone include:
+
+Development of a FastAPI-based middleware integration layer
+
+Implementation of session-aware IVR interaction handling
+
+Simulation of telephony workflows through a web-based IVR interface
+
+Design of modular conversational bridge endpoints for future AI integration
+
+Validation of multi-step interaction workflows including booking, PNR status, and tracking
+
+3️⃣ System Architecture
+
+The architecture designed in this milestone follows a layered integration model:
+
+User Interface Layer
+→ Web IVR Simulator
+
+Integration Layer
+→ FastAPI Middleware
+
+Conversational AI Layer
+→ Azure ACS / BAP (planned for next milestone)
+
+Legacy IVR Layer
+→ VXML-based interaction workflows
+
+The integration layer performs protocol translation, session tracking, and workflow orchestration between frontend simulation and backend logic.
+
+4️⃣ Key Components Implemented
+4.1 Session Management Module
+
+This module maintains active call sessions and preserves interaction context across multiple API calls. Each session stores:
+
+Unique session identifier
+
+Current workflow state
+
+User interaction history
+
+Collected input parameters
+
+This enables stateful conversational interaction simulation.
+
+4.2 IVR Routing Engine
+
+The routing engine determines workflow transitions based on user input. It supports:
+
+Menu navigation
+
+Multi-step booking flows
+
+Status retrieval workflows
+
+Error handling for invalid inputs
+
+This ensures structured IVR interaction simulation.
+
+4.3 REST API Controller
+
+The middleware exposes multiple endpoints to simulate telephony behavior:
+
+Call initialization endpoint
+
+User input handling endpoint
+
+Domain workflow endpoints
+
+Conversational bridge endpoint
+
+System health monitoring endpoint
+
+These endpoints enable modular integration and testing.
+
+4.4 Business Logic Layer
+
+Domain-specific workflows implemented include:
+
+Smart ticket booking
+
+PNR status retrieval
+
+Tatkal emergency booking
+
+Live train tracking
+
+These workflows demonstrate real-world IVR transaction handling.
+
+4.5 Web IVR Simulator
+
+A browser-based IVR interface was developed to simulate telephony interactions without requiring actual telephony infrastructure.
+
+Features include:
+
+Dialpad simulation
+
+Conversational input interface
+
+Real-time response rendering
+
+Session visualization
+
+This allows rapid testing and demonstration of integration logic.
+
+5️⃣ Integration Strategy
+
+The integration layer is designed as a middleware abstraction to minimize direct modifications to legacy IVR systems.
+
+It enables:
+
+Event-driven interaction processing
+
+JSON-based communication with conversational platforms
+
+Seamless extensibility for AI-driven workflows
+
+This ensures a smooth transition from traditional IVR to conversational systems.
+
+6️⃣ Scalability Considerations
+
+The system design incorporates scalability provisions such as:
+
+Stateless API architecture
+
+Modular service separation
+
+Cloud deployment readiness
+
+Horizontal scaling capability
+
+These design choices support enterprise-grade deployment.
+
+7️⃣ Validation and Testing
+
+Integration workflows were validated using:
+
+Simulated call flows via web IVR
+
+Multi-step interaction testing
+
+Session lifecycle verification
+
+Endpoint response validation
+
+This ensured functional correctness of the integration layer.
+
+8️⃣ Deliverables Achieved
+
+Milestone 2 successfully delivered:
+
+Fully functional middleware integration layer
+
+Modular REST API architecture
+
+Web-based IVR simulation interface
+
+Defined conversational bridge framework
+
+Validated interaction workflows
