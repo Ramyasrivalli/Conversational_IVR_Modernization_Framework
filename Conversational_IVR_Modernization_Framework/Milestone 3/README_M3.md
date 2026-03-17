@@ -92,14 +92,10 @@ repo/
 
 ## 🚀 Run Locally
 
-```bash
-git clone https://github.com/Diya-Parashar/Conversational-IVR-Modernization-Framework.git
-cd Conversational-IVR-Modernization-Framework
-python -m http.server 5500
+
 ```
 Open: `http://localhost:5500/irctc_simulator_m3.html`
 
-> Or use VS Code + Live Server extension → right click → Open with Live Server
 
 ---
 
