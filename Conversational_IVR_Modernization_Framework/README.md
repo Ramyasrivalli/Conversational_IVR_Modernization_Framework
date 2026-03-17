@@ -68,5 +68,4 @@ It serves as a reference implementation for upgrading legacy IVR systems using m
   🎓 Academic + internship project reference
 
 👤 Author:
-    Diya Parashar
-  
+    Ramya srivalli
