@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RailSpeak — IRCTC Smart IVR</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+:root{
+  --ink:#111827;--ink2:#374151;--ink3:#6B7280;--ink4:#9CA3AF;
+  --bg:#F3F4F6;--white:#FFFFFF;--border:#E5E7EB;--border2:#D1D5DB;
+  --blue:#1D4ED8;--blue2:#2563EB;--blue3:#3B82F6;--blue-bg:#EFF6FF;--blue-bd:#BFDBFE;
+  --red:#DC2626;--red-bg:#FEF2F2;--red-bd:#FECACA;
+  --green:#059669;--green-bg:#ECFDF5;
+  --amber:#D97706;--amber-bg:#FFFBEB;
+  --sh1:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+  --sh2:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.05);
+  --font:'Plus Jakarta Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:13px;line-height:1.55;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;flex-shrink:0;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;box-shadow:var(--sh1);z-index:100;
+}
+.logo-icon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#1D4ED8,#3B82F6);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 2px 8px rgba(29,78,216,.3);flex-shrink:0}
+.logo-name{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-.5px}
+.logo-name em{color:var(--red);font-style:normal}
+.logo-tag{font-family:var(--mono);font-size:10px;color:var(--blue);background:var(--blue-bg);border:1px solid var(--blue-bd);padding:2px 8px;border-radius:20px}
+.tb-gap{flex:1}
+.tb-status{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--green)}
+.tb-status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:bl 2s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.35}}
+.tts-pill{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--white);color:var(--ink2);transition:all .15s;user-select:none}
+.tts-pill:hover,.tts-pill.on{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+
+/* ── MAIN GRID ── */
+.main{flex:1;display:grid;grid-template-columns:258px 1fr 246px;min-height:0;overflow:hidden}
+
+/* ── SIDEBARS ── */
+.side{background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.side-r{border-right:none;border-left:1px solid var(--border)}
+.side-body{flex:1;overflow-y:auto;min-height:0}
+.side-body::-webkit-scrollbar{width:3px}
+.side-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.ss{padding:13px 13px 10px;border-bottom:1px solid var(--border)}
+.ss:last-child{border-bottom:none}
+.slbl{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:9px;display:block}
+
+/* Mode buttons */
+.mbtn{width:100%;display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;border:1px solid transparent;background:transparent;cursor:pointer;font-family:var(--font);font-size:12.5px;font-weight:600;color:var(--ink2);transition:all .12s;text-align:left;margin-bottom:3px}
+.mbtn .mi{font-size:15px;width:18px;text-align:center;flex-shrink:0}
+.mbtn:hover{background:var(--bg);color:var(--ink)}
+.mbtn.on{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+.mbadge{margin-left:auto;font-size:9px;font-weight:700;background:var(--blue);color:#fff;padding:1px 6px;border-radius:10px}
+
+/* Quick btns */
+.qlist{display:flex;flex-direction:column;gap:3px}
+.qbtn{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-family:var(--font);font-size:11.5px;color:var(--ink2);font-weight:500;transition:all .12s}
+.qbtn:hover{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+
+/* DTMF */
+.dg{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.dk{aspect-ratio:1;border:1px solid var(--border);border-radius:7px;background:var(--bg);cursor:pointer;font-family:var(--mono);font-size:16px;font-weight:500;color:var(--ink);display:flex;align-items:center;justify-content:center;transition:all .1s}
+.dk:hover{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);transform:scale(.96)}
+.dk:active{transform:scale(.9)}
+.dk.r{background:var(--red-bg);border-color:var(--red-bd);color:var(--red);font-size:13px}
+.dout{text-align:center;font-family:var(--mono);font-size:18px;padding:7px 4px 3px;color:var(--ink);letter-spacing:3px}
+
+/* PNR chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--ink2);cursor:pointer;transition:all .12s}
+.chip:hover{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+.phint{font-size:10px;color:var(--ink4);margin-top:7px;line-height:1.6}
+.g{color:var(--green);font-weight:700}.a{color:var(--amber);font-weight:700}.r{color:var(--red);font-weight:700}
+
+/* ── CHAT ── */
+.chat{display:flex;flex-direction:column;min-height:0;background:var(--bg);overflow:hidden}
+.chat-head{background:var(--white);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:var(--sh1)}
+.ch-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--blue-bg),#DBEAFE);border:2px solid var(--white);box-shadow:var(--sh1);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ch-ti{font-size:13.5px;font-weight:700;color:var(--ink)}
+.ch-su{font-size:11px;color:var(--green);font-weight:600;margin-top:1px}
+.ch-acts{margin-left:auto;display:flex;gap:6px}
+.ibtn{width:31px;height:31px;border-radius:7px;border:1px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink3);transition:all .12s}
+.ibtn:hover{background:var(--bg);color:var(--ink)}
+
+/* Messages area */
+.chat{background:#F0F4FF}
+.msgs{flex:1;overflow-y:auto;padding:24px 24px 12px;display:flex;flex-direction:column;gap:20px;min-height:0}
+.msgs::-webkit-scrollbar{width:4px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* Date separator */
+.date-sep{display:flex;align-items:center;gap:10px;margin:4px 0}
+.date-sep span{font-size:10.5px;color:var(--ink4);font-weight:600;white-space:nowrap;padding:3px 10px;background:rgba(255,255,255,.7);border-radius:20px;border:1px solid var(--border)}
+.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.mrow{display:flex;gap:10px;align-items:flex-start;animation:mi .25s ease}
+@keyframes mi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mrow.u{flex-direction:row-reverse}
+
+/* Avatar */
+.mav{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 1px 4px rgba(0,0,0,.12);margin-top:2px}
+.mav.b{background:linear-gradient(135deg,#1D4ED8,#3B82F6);color:#fff}
+.mav.u2{background:linear-gradient(135deg,#374151,#6B7280);color:#fff;font-size:13px}
+
+/* Bubbles */
+.bub-wrap{display:flex;flex-direction:column;gap:4px;max-width:72%}
+.mrow.u .bub-wrap{align-items:flex-end}
+
+.bub{padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.65;word-break:break-word}
+.mrow.bot .bub{
+  background:var(--white);
+  border:1px solid rgba(0,0,0,.06);
+  border-bottom-left-radius:4px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+  color:var(--ink);
+}
+.mrow.u .bub{
+  background:var(--blue);
+  color:#fff;
+  border-bottom-right-radius:4px;
+  box-shadow:0 2px 10px rgba(29,78,216,.3);
+}
+.bub b{font-weight:700}
+.bub code{
+  font-family:var(--mono);font-size:11.5px;
+  background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px;
+  letter-spacing:.02em;
+}
+.mrow.u .bub code{background:rgba(255,255,255,.22)}
+
+/* Sender name */
+.bub-name{font-size:10px;font-weight:700;color:var(--ink4);letter-spacing:.03em;padding:0 4px}
+.mrow.u .bub-name{color:var(--ink4)}
+
+/* Intent meta */
+.mmeta{display:flex;align-items:center;gap:6px;margin-top:2px;padding:0 2px}
+.ibadge{
+  font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:20px;
+  background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd);font-weight:600;
+  letter-spacing:.02em;
+}
+.cbar{height:2.5px;width:44px;background:var(--border);border-radius:2px;overflow:hidden}
+.cfill{height:100%;border-radius:2px;transition:width .5s}
+.clbl{font-family:var(--mono);font-size:9px;color:var(--ink4)}
+
+/* Quick reply buttons */
+.qrs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.qr{
+  padding:5px 13px;border-radius:20px;
+  border:1.5px solid var(--blue-bd);
+  background:var(--blue-bg);color:var(--blue);
+  font-size:12px;font-weight:600;
+  font-family:var(--font);cursor:pointer;transition:all .15s;
+}
+.qr:hover{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 2px 8px rgba(29,78,216,.25)}
+
+/* Typing */
+.typing-wrap{flex-shrink:0;padding:0 24px 8px;display:none}
+.typing-wrap.show{display:flex;gap:10px;align-items:flex-start}
+.tbub{background:var(--white);border:1px solid rgba(0,0,0,.06);border-radius:18px;border-bottom-left-radius:4px;padding:13px 16px;display:flex;gap:4px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.td{width:6px;height:6px;border-radius:50%;background:var(--ink4);animation:td 1.1s infinite}
+.td:nth-child(2){animation-delay:.18s}
+.td:nth-child(3){animation-delay:.36s}
+@keyframes td{0%,60%,100%{transform:scale(.55);opacity:.35}30%{transform:scale(1);opacity:1}}
+
+/* Input bar */
+.input-bar{background:var(--white);border-top:1px solid var(--border);padding:14px 18px 12px;flex-shrink:0}
+.inp-row{display:flex;gap:8px;align-items:center}
+.mic-btn{
+  width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border2);
+  background:var(--bg);cursor:pointer;font-size:18px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s;flex-shrink:0;
+}
+.mic-btn:hover{background:var(--blue-bg);border-color:var(--blue)}
+.mic-btn.on{background:var(--red-bg);border-color:var(--red);animation:mp 1.2s infinite}
+@keyframes mp{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.3)}50%{box-shadow:0 0 0 8px rgba(220,38,38,0)}}
+.ci{
+  flex:1;height:42px;padding:0 16px;border-radius:24px;
+  border:1.5px solid var(--border2);background:#F8FAFF;
+  font-family:var(--font);font-size:13.5px;color:var(--ink);
+  outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.ci:focus{border-color:var(--blue3);box-shadow:0 0 0 3px rgba(59,130,246,.12);background:var(--white)}
+.ci::placeholder{color:var(--ink4)}
+.send-btn{
+  width:42px;height:42px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--blue),var(--blue3));
+  cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  box-shadow:0 3px 10px rgba(29,78,216,.35);transition:all .15s;flex-shrink:0;
+}
+.send-btn:hover{transform:scale(1.07);box-shadow:0 4px 14px rgba(29,78,216,.45)}
+.send-btn:active{transform:scale(.94)}
+.vstatus{text-align:center;font-size:10.5px;color:var(--ink4);margin-top:8px;height:14px}
+.vstatus.rec{color:var(--red);font-weight:600}
+
+/* ── RIGHT PANEL ── */
+.sc-grid{display:flex;flex-direction:column;gap:6px}
+.sc{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:10px}
+.sc-ico{font-size:18px;flex-shrink:0}
+.sc-lbl{font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink4)}
+.sc-val{font-size:20px;font-weight:800;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+
+.dbr{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
+.dbr:last-child{border-bottom:none}
+.dbk{font-family:var(--mono);font-size:9.5px;color:var(--ink4)}
+.dbv{font-family:var(--mono);font-size:9.5px;font-weight:600;color:var(--ink);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dbv.hi{color:var(--blue)}.dbv.g{color:var(--green)}.dbv.r{color:var(--red)}.dbv.a{color:var(--amber)}
+
+.rc{border-radius:9px;overflow:hidden;border:1px solid var(--border)}
+.rc-h{background:var(--blue);color:#fff;padding:7px 11px;font-size:11px;font-weight:700}
+.rc-b{padding:9px 11px;background:var(--bg)}
+.rcr{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px}
+.rcr:last-child{border-bottom:none}
+.rck{color:var(--ink3)}.rcv{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--ink)}
+.rcv.g{color:var(--green)}.rcv.a{color:var(--amber)}.rcv.r{color:var(--red)}
+
+.hi-item{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)}
+.hi-item:last-child{border-bottom:none}
+.ht{font-family:var(--mono);font-size:9px;color:var(--ink4);width:34px;flex-shrink:0}
+.hint{color:var(--blue);font-weight:700;font-size:10.5px;flex:1}
+.hc{font-family:var(--mono);font-size:9px;color:var(--ink4)}
+
+.cap-list{display:flex;flex-direction:column;gap:3px}
+.cap{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);padding:3px 5px;border-radius:5px}
+.cap:hover{background:var(--bg)}
+.cdot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+.reset-btn{width:100%;padding:8px;border-radius:7px;border:1px solid var(--border2);background:var(--white);color:var(--ink2);font-family:var(--font);font-size:11.5px;font-weight:700;cursor:pointer;transition:all .12s}
+.reset-btn:hover{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
+
+/* Empty state */
+.es{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;gap:10px;padding:24px}
+.es-ico{font-size:44px}
+.es-ti{font-size:17px;font-weight:700;color:var(--ink)}
+.es-sb{font-size:12.5px;color:var(--ink3);max-width:290px;line-height:1.6}
+.es-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px}
+.es-chip{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--white);color:var(--ink2);cursor:pointer;font-weight:600;transition:all .12s}
+.es-chip:hover{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo-icon">🚂</div>
+  <div class="logo-name">Rail<em>Speak</em></div>
+  <span class="logo-tag">IRCTC Smart IVR</span>
+  <div class="tb-gap"></div>
+  <div class="tb-status">System Online</div>
+  <div class="tts-pill on" id="ttsBtn" onclick="toggleTTS()">🔊 <span id="ttsLbl">Voice On</span></div>
+</header>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- LEFT -->
+  <aside class="side">
+    <div class="side-body">
+
+      <div class="ss">
+        <span class="slbl">Input Mode</span>
+        <button class="mbtn on" id="btnChat"  onclick="setMode('chat')"><span class="mi">💬</span>Text Chat<span class="mbadge">Active</span></button>
+        <button class="mbtn"    id="btnVoice" onclick="setMode('voice')"><span class="mi">🎤</span>Voice (STT)</button>
+        <button class="mbtn"    id="btnDTMF"  onclick="setMode('dtmf')"><span class="mi">🔢</span>DTMF Keypad</button>
+      </div>
+
+      <div class="ss" id="dtmfSec" style="display:none">
+        <span class="slbl">Keypad</span>
+        <div class="dg">
+          <button class="dk" onclick="dtmf('1')">1</button><button class="dk" onclick="dtmf('2')">2</button><button class="dk" onclick="dtmf('3')">3</button>
+          <button class="dk" onclick="dtmf('4')">4</button><button class="dk" onclick="dtmf('5')">5</button><button class="dk" onclick="dtmf('6')">6</button>
+          <button class="dk" onclick="dtmf('7')">7</button><button class="dk" onclick="dtmf('8')">8</button><button class="dk" onclick="dtmf('9')">9</button>
+          <button class="dk" onclick="dtmf('*')" style="font-size:20px">✱</button><button class="dk" onclick="dtmf('0')">0</button><button class="dk r" onclick="clearDTMF()">⌫</button>
+        </div>
+        <div class="dout" id="dtmfOut">—</div>
+        <div style="font-size:9.5px;color:var(--ink4);text-align:center;margin-top:2px;line-height:1.6">1=PNR · 2=Book · 3=Track · 4=Schedule<br>5=Fare · 6=Cancel · 9=Complaint · 0=Exit</div>
+      </div>
+
+      <div class="ss">
+        <span class="slbl">Quick Queries</span>
+        <div class="qlist">
+          <button class="qbtn" onclick="q('Check PNR 1234567890')">📋 PNR Status Check</button>
+          <button class="qbtn" onclick="q('Book ticket from Delhi to Mumbai 15 April sleeper')">🎫 Book Delhi → Mumbai</button>
+          <button class="qbtn" onclick="q('Tatkal ticket Bangalore to Chennai tomorrow')">⚡ Tatkal Emergency</button>
+          <button class="qbtn" onclick="q('Live status train 12951')">📍 Track Train 12951</button>
+          <button class="qbtn" onclick="q('Schedule of train 12301')">🕐 Train 12301 Schedule</button>
+          <button class="qbtn" onclick="q('Fare from Delhi to Bangalore 3AC')">💰 Fare Enquiry</button>
+          <button class="qbtn" onclick="q('Cancel ticket PNR 9876543210')">❌ Cancel Ticket</button>
+          <button class="qbtn" onclick="q('I have a complaint about food quality')">📢 File Complaint</button>
+        </div>
+      </div>
+
+      <div class="ss">
+        <span class="slbl">Sample PNRs</span>
+        <div class="chips">
+          <span class="chip" onclick="q('Check PNR 1234567890')">1234567890</span>
+          <span class="chip" onclick="q('Check PNR 9876543210')">9876543210</span>
+          <span class="chip" onclick="q('Check PNR 5555555555')">5555555555</span>
+          <span class="chip" onclick="q('Check PNR 4444444444')">4444444444</span>
+        </div>
+        <div class="phint">
+          1234567890 → <span class="g">CONFIRMED</span><br>
+          9876543210 → <span class="a">RAC 12</span><br>
+          5555555555 → <span class="r">WAITLIST 89</span><br>
+          4444444444 → <span class="g">CONFIRMED</span>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- CHAT -->
+  <section class="chat" style="background:#F0F4FF">
+
+    <div class="chat-head">
+      <div class="ch-av">🤖</div>
+      <div>
+        <div class="ch-ti">RailSpeak Assistant</div>
+        <div class="ch-su">● Online — Ready to assist</div>
+      </div>
+      <div class="ch-acts">
+        <button class="ibtn" title="Export" onclick="exportChat()">📥</button>
+        <button class="ibtn" title="Reset"  onclick="resetChat()">↺</button>
+      </div>
+    </div>
+
+    <div class="msgs" id="msgs"></div>
+
+    <div class="typing-wrap" id="typingWrap">
+      <div class="mav b" style="width:32px;height:32px;font-size:15px;margin-top:2px">🤖</div>
+      <div class="tbub"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+    </div>
+
+    <div class="input-bar">
+      <div class="inp-row">
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+        <input class="ci" id="inp" type="text" placeholder="Ask about PNR, booking, trains, fares…" onkeydown="if(event.key==='Enter')send()"/>
+        <button class="send-btn" onclick="send()">➤</button>
+      </div>
+      <div class="vstatus" id="vstatus">Press 🎤 to speak or type your query above</div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="side side-r">
+    <div class="side-body">
+
+      <div class="ss">
+        <span class="slbl">Session Stats</span>
+        <div class="sc-grid">
+          <div class="sc"><div class="sc-ico">💬</div><div><div class="sc-lbl">Messages</div><div class="sc-val" id="sMsgs">0</div></div></div>
+          <div class="sc"><div class="sc-ico">🎯</div><div><div class="sc-lbl">Intents Detected</div><div class="sc-val" id="sInts">0</div></div></div>
+          <div class="sc"><div class="sc-ico">📊</div><div><div class="sc-lbl">Avg Confidence</div><div class="sc-val" id="sConf">—</div></div></div>
+        </div>
+      </div>
+
+      <div class="ss">
+        <span class="slbl">NLU Debug</span>
+        <div class="dbr"><span class="dbk">Intent</span>    <span class="dbv hi" id="dInt">—</span></div>
+        <div class="dbr"><span class="dbk">Confidence</span><span class="dbv"    id="dConf">—</span></div>
+        <div class="dbr"><span class="dbk">State</span>     <span class="dbv"    id="dState">welcome</span></div>
+        <div class="dbr"><span class="dbk">PNR</span>       <span class="dbv"    id="dPNR">—</span></div>
+        <div class="dbr"><span class="dbk">Train #</span>   <span class="dbv"    id="dTrain">—</span></div>
+        <div class="dbr"><span class="dbk">From</span>      <span class="dbv"    id="dFrom">—</span></div>
+        <div class="dbr"><span class="dbk">To</span>        <span class="dbv"    id="dTo">—</span></div>
+        <div class="dbr"><span class="dbk">Date</span>      <span class="dbv"    id="dDate">—</span></div>
+        <div class="dbr"><span class="dbk">Class</span>     <span class="dbv"    id="dClass">—</span></div>
+      </div>
+
+      <div class="ss" id="resSec" style="display:none">
+        <span class="slbl">Last Result</span>
+        <div class="rc" id="resCard"></div>
+      </div>
+
+      <div class="ss">
+        <span class="slbl">Intent History</span>
+        <div id="histList"><div style="font-size:11px;color:var(--ink4);font-style:italic">No queries yet</div></div>
+      </div>
+
+      <div class="ss">
+        <span class="slbl">Capabilities</span>
+        <div class="cap-list">
+          <div class="cap"><span class="cdot"></span>PNR Status Check</div>
+          <div class="cap"><span class="cdot"></span>Smart Ticket Booking</div>
+          <div class="cap"><span class="cdot"></span>Tatkal Emergency Booking</div>
+          <div class="cap"><span class="cdot"></span>Live Train Tracking</div>
+          <div class="cap"><span class="cdot"></span>Train Schedule Lookup</div>
+          <div class="cap"><span class="cdot"></span>Fare Enquiry</div>
+          <div class="cap"><span class="cdot"></span>Ticket Cancellation</div>
+          <div class="cap"><span class="cdot"></span>Complaint Registration</div>
+          <div class="cap"><span class="cdot"></span>Voice Input (STT)</div>
+          <div class="cap"><span class="cdot"></span>Text-to-Speech Output</div>
+          <div class="cap"><span class="cdot"></span>DTMF Keypad Mode</div>
+          <div class="cap"><span class="cdot"></span>Multi-turn Dialogue</div>
+        </div>
+      </div>
+
+      <div class="ss">
+        <button class="reset-btn" onclick="resetChat()">↺ New Conversation</button>
+      </div>
+
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/* ══ DATA ══════════════════════════════════════ */
+const PNR_DB={
+  '1234567890':{train:'12951',date:'15 Apr 2025',cls:'SL', coach:'B4',  berth:'32 (Lower)',     status:'CONFIRMED',platform:3},
+  '9876543210':{train:'12630',date:'18 Apr 2025',cls:'3A', coach:'A2',  berth:'15 (Side Lower)',status:'RAC 12',   platform:1},
+  '5555555555':{train:'12483',date:'20 Apr 2025',cls:'SL', coach:'—',   berth:'—',              status:'WL 89',   platform:null},
+  '4444444444':{train:'22119',date:'22 Apr 2025',cls:'2A', coach:'H1',  berth:'05 (Upper)',     status:'CONFIRMED',platform:5},
+};
+const TRAIN_DB={
+  '12951':{name:'Mumbai Rajdhani Express',  from:'New Delhi', to:'Mumbai Central',dep:'16:35',arr:'08:35+1',delay:'On Time',    cur:'Surat',     next:'Vadodara',   dist:'1384 km'},
+  '12630':{name:'Yeshwantpur Express',       from:'Yeshwantpur',to:'Howrah',      dep:'21:30',arr:'04:45+2',delay:'12 min late',cur:'Nagpur',    next:'Raipur',     dist:'2145 km'},
+  '12483':{name:'Amritsar Express',          from:'Kochuveli', to:'Amritsar Jn',  dep:'11:10',arr:'06:25+2',delay:'On Time',    cur:'Delhi',     next:'Ambala',     dist:'2830 km'},
+  '22119':{name:'Mumbai CSMT AC Express',   from:'Lucknow',   to:'Mumbai CSMT',  dep:'07:40',arr:'23:55',  delay:'5 min late', cur:'Manmad',    next:'Nashik Road',dist:'1475 km'},
+  '12301':{name:'Howrah Rajdhani Express',  from:'Howrah',    to:'New Delhi',    dep:'14:05',arr:'10:00+1',delay:'On Time',    cur:'Allahabad', next:'Kanpur',     dist:'1447 km'},
+  '12002':{name:'Bhopal Shatabdi Express',  from:'New Delhi', to:'Habibganj',    dep:'06:00',arr:'13:55',  delay:'On Time',    cur:'Agra',      next:'Gwalior',    dist:'705 km'},
+};
+const FARES={
+  SL:  {'Delhi-Mumbai':735,'Delhi-Bangalore':1205,'Delhi-Chennai':1265,'Delhi-Kolkata':705,'Delhi-Hyderabad':940,'Delhi-Jaipur':215,'Mumbai-Bangalore':580,'Bangalore-Chennai':300,'Mumbai-Chennai':735},
+  '3A':{'Delhi-Mumbai':1985,'Delhi-Bangalore':2785,'Delhi-Chennai':3005,'Delhi-Kolkata':1875,'Delhi-Hyderabad':2305,'Delhi-Jaipur':495,'Mumbai-Bangalore':1430,'Bangalore-Chennai':880,'Mumbai-Chennai':1985},
+  '2A':{'Delhi-Mumbai':2865,'Delhi-Bangalore':4025,'Delhi-Chennai':4345,'Delhi-Kolkata':2740,'Delhi-Hyderabad':3345,'Delhi-Jaipur':690,'Mumbai-Bangalore':2050,'Bangalore-Chennai':1295,'Mumbai-Chennai':2865},
+  '1A':{'Delhi-Mumbai':4785,'Delhi-Bangalore':6675,'Delhi-Chennai':7225,'Delhi-Kolkata':4560,'Delhi-Hyderabad':5545,'Delhi-Jaipur':1150,'Bangalore-Chennai':2145},
+  CC:  {'Delhi-Mumbai':1575,'Delhi-Bangalore':2450,'Delhi-Chennai':2640,'Delhi-Kolkata':1640,'Delhi-Jaipur':355},
+};
+const CITIES=['delhi','mumbai','bangalore','chennai','kolkata','hyderabad','jaipur','pune','ahmedabad','lucknow','surat','agra','bhopal','nagpur','kanpur'];
+
+/* ══ NLU ══════════════════════════════════════ */
+const INTENTS={
+  book_ticket:         [/\bbook\b/,/\bbooking\b/,/\breserve\b/,/\bticket\b/,/\bjourney\b/,/\bseat\b/,/\btatkal\b/,/\burgent.*book/,/\bwant.*ticket/,/\bneed.*ticket/],
+  pnr_status:          [/\bpnr\b/,/\bstatus\b/,/\bconfirm/,/\brac\b/,/\bwaitlist\b/,/\bwl\b/,/\bcheck.*ticket/,/\bticket.*status/],
+  train_running_status:[/\brunning\b/,/\blive\b/,/\btrack\b/,/\bwhere.*train/,/\btrain.*where/,/\blate\b/,/\bdelay\b/,/\blocation\b/],
+  train_schedule:      [/\bschedule\b/,/\btimetable\b/,/\bdeparture\b/,/\barrival\b/,/\broute\b/,/\bwhen.*train/,/\btrain.*time/],
+  cancel_ticket:       [/\bcancel\b/,/\bcancellation\b/,/\brefund\b/],
+  fare_enquiry:        [/\bfare\b/,/\bprice\b/,/\bcost\b/,/\bhow much\b/,/\btariff\b/],
+  complaint:           [/\bcomplaint\b/,/\bgrievance\b/,/\bissue\b/,/\bproblem\b/,/\bfeedback\b/],
+  greeting:            [/^(hi|hello|hey|good\s*(morning|evening|afternoon)|namaste)\b/],
+  exit:                [/\b(bye|exit|quit|goodbye|end|done)\b/],
+};
+
+function detectIntent(t){
+  const s=t.toLowerCase().trim(),sc={};
+  for(const[k,ps]of Object.entries(INTENTS)){const h=ps.filter(p=>p.test(s)).length;if(h)sc[k]=h/ps.length;}
+  if(!Object.keys(sc).length)return['unknown',0];
+  const[best,c]=Object.entries(sc).sort((a,b)=>b[1]-a[1])[0];
+  return[best,Math.min(c,1)];
+}
+
+function extractEntities(t){
+  const s=t.toLowerCase(),e={};
+  const pnrM=t.match(/\b(\d{10})\b/);if(pnrM)e.pnr=pnrM[1];
+  const trainM=t.match(/\b(\d{5})\b/);if(trainM&&!e.pnr)e.train=trainM[1];
+  const found=CITIES.filter(c=>s.includes(c));
+  const fm=/\b(from|leaving|departing|origin)\s+(\w+)/i.exec(s);if(fm&&CITIES.includes(fm[2]))e.from=fm[2];
+  const tm=/\b(to|towards|going to|reach|destination)\s+(\w+)/i.exec(s);if(tm&&CITIES.includes(tm[2]))e.to=tm[2];
+  if(!e.from&&found[0])e.from=found[0];
+  if(!e.to&&found[1])e.to=found[1];
+  e.fromC=e.from?cap(e.from):null;e.toC=e.to?cap(e.to):null;
+  const dm=s.match(/\b(\d{1,2})\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/i)||s.match(/\b(today|tomorrow)\b/i);
+  if(dm)e.date=dm[0];
+  const cm=s.match(/\b(sleeper|sl|3ac?|2ac?|1ac?|chair\s*car|cc|2s)\b/i);
+  if(cm){const cx={sleeper:'SL',sl:'SL','3a':'3A','3ac':'3A','2a':'2A','2ac':'2A','1a':'1A','1ac':'1A','chaircar':'CC','chair car':'CC',cc:'CC','2s':'2S'};e.cls=cx[cm[1].toLowerCase().replace(/\s/,'')]||cm[1].toUpperCase();}
+  if(/tatkal|urgent|emergency/i.test(s))e.tatkal=true;
+  return e;
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function fareFor(f,t,c){const k1=`${cap(f)}-${cap(t)}`,k2=`${cap(t)}-${cap(f)}`,tb=FARES[c]||FARES.SL;return tb[k1]||tb[k2]||null}
+
+/* ══ SESSION ═══════════════════════════════════ */
+let sess={state:'welcome',intent:null,ents:{}};
+let ttsOn=true,listening=false,recog=null;
+let nMsgs=0,nInts=0,confTotal=0,dtmfBuf='';
+let emptyPurged=false;
+
+/* ══ DIALOGUE ══════════════════════════════════ */
+function dialogue(text,intent,conf,ents){
+  const e=Object.assign({},sess.ents,ents);sess.ents=e;
+  const mid=sess.state!=='welcome'&&sess.state!=='idle';
+  if(mid&&(intent==='unknown'||conf<0.35)&&!['greeting','exit'].includes(intent)){
+    if(sess.state.startsWith('book'))intent='book_ticket';
+    else if(sess.state==='pnr_wait')intent='pnr_status';
+    else if(sess.state==='cancel_wait')intent='cancel_ticket';
+    else if(sess.state==='sched_wait')intent='train_schedule';
+    else if(sess.state==='track_wait')intent='train_running_status';
+  }
+
+  if(sess.state==='welcome'||intent==='greeting'){
+    sess.state='idle';
+    return{msg:`<b>Namaste! 🙏 Welcome to RailSpeak</b><br>IRCTC's Conversational IVR Assistant<br><br>I can help you with <b>PNR status</b>, <b>ticket booking</b> (including ⚡ Tatkal), <b>live train tracking</b>, <b>schedules</b>, <b>fares</b>, <b>cancellations</b> and <b>complaints</b>.<br><br>How can I assist you today?`,
+      opts:['Check PNR status','Book a ticket','Track my train','Fare enquiry']};
+  }
+
+  if(intent==='exit'){sess={state:'welcome',intent:null,ents:{}};return{msg:`Thank you for using RailSpeak! 🚂 Have a safe journey!`,opts:[]};}
+
+  if(intent==='pnr_status'||sess.state==='pnr_wait'){
+    sess.intent='pnr_status';
+    if(!e.pnr){sess.state='pnr_wait';return{msg:`Please share your <b>10-digit PNR number</b>.<br>Example: <code>1234567890</code>`,opts:['1234567890','9876543210','5555555555']};}
+    const p=PNR_DB[e.pnr];
+    if(p){
+      const t=TRAIN_DB[p.train]||{};
+      const isC=p.status.startsWith('CONFIRMED'),isR=p.status.startsWith('RAC');
+      showResult('pnr',{pnr:e.pnr,...p,...t});
+      sess.state='idle';sess.ents={};
+      return{msg:`📋 <b>PNR Status — ${e.pnr}</b><br><br>Train: <b>${p.train}</b>${t.name?' — '+t.name:''}<br>Route: ${t.from||'—'} → ${t.to||'—'}<br>Date: <b>${p.date}</b><br>Class: ${p.cls} &nbsp;|&nbsp; Coach: <b>${p.coach}</b> &nbsp;|&nbsp; Berth: <b>${p.berth}</b>${p.platform?'<br>Platform: <b>'+p.platform+'</b>':''}<br><br>${isC?'✅':isR?'🟡':'❌'} Status: <b>${p.status}</b>`,
+        opts:['Check another PNR','Track this train','Main menu']};
+    }
+    sess.state='idle';sess.ents={};
+    return{msg:`❌ PNR <b>${e.pnr}</b> not found. Try: 1234567890, 9876543210, 5555555555`,opts:['Try 1234567890']};
+  }
+
+  if(intent==='book_ticket'||sess.state.startsWith('book')){
+    sess.intent='book_ticket';
+    const isTk=e.tatkal||/tatkal|urgent|emergency/i.test(text);
+    const hdr=isTk?'⚡ <b>Tatkal Booking</b><br>':'🎫 <b>Ticket Booking</b><br>';
+    if(!e.from){sess.state='book_from';return{msg:`${hdr}<br>Where to <b>travel from</b>?`,opts:['Delhi','Mumbai','Bangalore','Chennai','Kolkata','Hyderabad']};}
+    if(!e.to)  {sess.state='book_to';  return{msg:`From <b>${e.fromC}</b>. Where to <b>travel to</b>?`,opts:['Mumbai','Chennai','Delhi','Bangalore','Kolkata','Hyderabad']};}
+    if(!e.date){sess.state='book_dt';  return{msg:`<b>${e.fromC} → ${e.toC}</b><br>Which <b>date</b>?`,opts:['Today','Tomorrow','15 April','20 April','25 April']};}
+    if(!e.cls) {sess.state='book_cl';  return{msg:`Date: <b>${e.date}</b><br>Which <b>travel class</b>?`,opts:['Sleeper (SL)','3rd AC (3A)','2nd AC (2A)','1st AC (1A)','Chair Car (CC)']};}
+    const baseFare=fareFor(e.from,e.to,e.cls)||(Math.floor(Math.random()*900)+400);
+    const tkChg=isTk?Math.floor(baseFare*.3):0,total=baseFare+tkChg;
+    const bId='BK'+Date.now().toString().slice(-8);
+    const trains=[{no:'12301',name:'Rajdhani Express',dep:'06:30',dur:'16h 25m',av:isTk?3:42},{no:'12483',name:'Express Superfast',dep:'11:15',dur:'22h 10m',av:isTk?1:18},{no:'22119',name:'AC Express',dep:'17:45',dur:'19h 55m',av:isTk?2:27}];
+    const rows=trains.map((tr,i)=>`&nbsp;&nbsp;${i+1}. <b>${tr.no}</b> ${tr.name} — ${tr.dep} | ${tr.dur} | <b>${tr.av} seats</b>`).join('<br>');
+    showResult('booking',{from:e.fromC,to:e.toC,date:e.date,cls:e.cls,fare:total,tatkal:isTk,bId});
+    sess.state='idle';sess.ents={};
+    return{msg:`${isTk?'⚡ <b>Tatkal Trains</b>':'🎫 <b>Available Trains</b>'}<br>${e.fromC} → ${e.toC} | ${e.date} | ${e.cls}<br><br>${rows}<br><br>💰 Fare: ₹${baseFare}${isTk?` + ₹${tkChg} Tatkal = <b>₹${total}</b>`:''}<br>🔗 Ref: <code>${bId}</code><br><br>⚠️ Complete payment on IRCTC app/website.`,
+      opts:['Check PNR','Book another ticket','Main menu']};
+  }
+
+  if(intent==='train_running_status'||sess.state==='track_wait'){
+    sess.intent='train_running_status';
+    const tn=e.train||(e.pnr&&PNR_DB[e.pnr]?PNR_DB[e.pnr].train:null);
+    if(!tn){sess.state='track_wait';return{msg:`📍 <b>Live Train Tracking</b><br><br>Please provide the <b>5-digit train number</b>.`,opts:['12951','12301','12630','22119','12002']};}
+    const t=TRAIN_DB[tn];
+    if(t){
+      showResult('track',{...t,tn});sess.state='idle';sess.ents={};
+      return{msg:`📍 <b>Live Status — Train ${tn}</b><br>${t.name}<br><br>${t.delay==='On Time'?'✅':'⚠️'} Status: <b>${t.delay}</b><br>Route: ${t.from} → ${t.to}<br>Dep: ${t.dep} &nbsp;|&nbsp; Arr: ${t.arr}<br><br>Currently at: <b>${t.cur}</b><br>Next stop: <b>${t.next}</b><br>Distance: ${t.dist}`,
+        opts:['Track another train','Check PNR','Main menu']};
+    }
+    sess.state='idle';sess.ents={};
+    return{msg:`Train <b>${tn}</b> not found. Try: 12951, 12301, 12630, 22119`,opts:['12951','12301']};
+  }
+
+  if(intent==='train_schedule'||sess.state==='sched_wait'){
+    sess.intent='train_schedule';
+    if(!e.train){sess.state='sched_wait';return{msg:`🕐 <b>Train Schedule</b><br><br>Please provide the <b>5-digit train number</b>.`,opts:['12951','12301','12630','22119','12002']};}
+    const t=TRAIN_DB[e.train];
+    if(t){sess.state='idle';sess.ents={};return{msg:`🕐 <b>Schedule — Train ${e.train}</b><br>${t.name}<br><br>From: <b>${t.from}</b> at ${t.dep}<br>To: <b>${t.to}</b> at ${t.arr}<br>Distance: ${t.dist}<br><br>📌 Full station-wise schedule on IRCTC website.`,opts:['Track this train','Book ticket','Main menu']};}
+    sess.state='idle';sess.ents={};return{msg:`Train <b>${e.train}</b> not found. Try: 12951, 12301, 12630`,opts:['12951','12301']};
+  }
+
+  if(intent==='fare_enquiry'){
+    if(!e.from||!e.to)return{msg:`💰 <b>Fare Enquiry</b><br><br>Please specify route and class.<br>Example: <i>"Fare from Delhi to Mumbai sleeper"</i>`,opts:['Delhi to Mumbai sleeper','Delhi to Bangalore 3AC','Mumbai to Chennai 2AC']};
+    const cls=e.cls||'SL',fare=fareFor(e.from,e.to,cls);
+    sess.state='idle';sess.ents={};
+    if(fare)return{msg:`💰 <b>Fare — ${e.fromC} → ${e.toC}</b><br><br>Class: <b>${cls}</b><br>Base fare: <b>₹${fare}</b><br>Tatkal surcharge: ₹${Math.floor(fare*.3)}<br><br>📌 Fares subject to dynamic pricing.`,opts:['Book this route','Check another fare']};
+    return{msg:`Fare for ${e.fromC} → ${e.toC} (${cls}) not in simulator. Check IRCTC website.`,opts:['Try Delhi to Mumbai sleeper']};
+  }
+
+  if(intent==='cancel_ticket'||sess.state==='cancel_wait'){
+    sess.intent='cancel_ticket';
+    if(!e.pnr){sess.state='cancel_wait';return{msg:`❌ <b>Ticket Cancellation</b><br><br>Please provide your <b>10-digit PNR number</b>.`,opts:['1234567890','9876543210']};}
+    const p=PNR_DB[e.pnr];
+    if(p){const r=p.status.startsWith('CONFIRMED')?Math.floor(Math.random()*400+600):p.status.startsWith('RAC')?Math.floor(Math.random()*200+150):0;sess.state='idle';sess.ents={};return{msg:`⚠️ <b>Cancellation Preview — PNR ${e.pnr}</b><br><br>Train: ${p.train} | Class: ${p.cls}<br>Berth: ${p.berth} | Date: ${p.date}<br>Status: ${p.status}<br><br>Estimated refund: <b>₹${r}</b><br><br>🔔 Actual cancellation via IRCTC app/website only.`,opts:['Check PNR','Main menu']};}
+    sess.state='idle';sess.ents={};return{msg:`PNR <b>${e.pnr}</b> not found.`,opts:['Try 1234567890']};
+  }
+
+  if(intent==='complaint'){const ref='CMP'+Date.now().toString().slice(-7);sess.state='idle';return{msg:`📢 <b>Complaint Registered</b><br><br>Ref ID: <code>${ref}</code><br><br>Response within 48 hours.<br><br>Also: IRCTC Helpline <b>139</b> · @IRCTCofficial · pgportal.gov.in`,opts:['Main menu']};}
+
+  return{msg:`I didn't quite understand that. 🤔<br><br>I can help with:<br>• 📋 PNR status &nbsp;• 🎫 Booking & Tatkal<br>• 📍 Live tracking &nbsp;• 💰 Fare enquiry<br>• ❌ Cancellation &nbsp;• 📢 Complaints`,opts:['Check PNR','Book ticket','Track train','Fare enquiry']};
+}
+
+/* ══ RESULT CARD ═══════════════════════════════ */
+function showResult(type,d){
+  document.getElementById('resSec').style.display='block';
+  const c=document.getElementById('resCard');
+  if(type==='pnr'){
+    const sc=d.status.startsWith('CONFIRMED')?'g':d.status.startsWith('RAC')?'a':'r';
+    c.innerHTML=`<div class="rc-h">📋 PNR ${d.pnr}</div><div class="rc-b">
+      <div class="rcr"><span class="rck">Train</span><span class="rcv">${d.train}</span></div>
+      <div class="rcr"><span class="rck">Date</span><span class="rcv">${d.date}</span></div>
+      <div class="rcr"><span class="rck">Class</span><span class="rcv">${d.cls}</span></div>
+      <div class="rcr"><span class="rck">Coach/Berth</span><span class="rcv">${d.coach}</span></div>
+      <div class="rcr"><span class="rck">Status</span><span class="rcv ${sc}">${d.status}</span></div>
+      ${d.platform?`<div class="rcr"><span class="rck">Platform</span><span class="rcv">${d.platform}</span></div>`:''}
+    </div>`;
+  }else if(type==='booking'){
+    c.innerHTML=`<div class="rc-h">🎫 Booking Preview</div><div class="rc-b">
+      <div class="rcr"><span class="rck">From</span><span class="rcv">${d.from}</span></div>
+      <div class="rcr"><span class="rck">To</span><span class="rcv">${d.to}</span></div>
+      <div class="rcr"><span class="rck">Date</span><span class="rcv">${d.date}</span></div>
+      <div class="rcr"><span class="rck">Class</span><span class="rcv">${d.cls}</span></div>
+      <div class="rcr"><span class="rck">Total Fare</span><span class="rcv g">₹${d.fare}</span></div>
+      ${d.tatkal?`<div class="rcr"><span class="rck">Type</span><span class="rcv a">TATKAL</span></div>`:''}
+    </div>`;
+  }else if(type==='track'){
+    const ok=d.delay==='On Time';
+    c.innerHTML=`<div class="rc-h">📍 Train ${d.tn}</div><div class="rc-b">
+      <div class="rcr"><span class="rck">Status</span><span class="rcv ${ok?'g':'a'}">${d.delay}</span></div>
+      <div class="rcr"><span class="rck">At Station</span><span class="rcv">${d.cur}</span></div>
+      <div class="rcr"><span class="rck">Next Stop</span><span class="rcv">${d.next}</span></div>
+      <div class="rcr"><span class="rck">Departure</span><span class="rcv">${d.dep}</span></div>
+      <div class="rcr"><span class="rck">Arrival</span><span class="rcv">${d.arr}</span></div>
+    </div>`;
+  }
+}
+
+/* ══ UI HELPERS ════════════════════════════════ */
+function purgeEmpty(){if(emptyPurged)return;document.getElementById('msgs').innerHTML='';emptyPurged=true;}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function scrollChat(){setTimeout(()=>{const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;},80)}
+function showTyping(){document.getElementById('typingWrap').classList.add('show');scrollChat()}
+function hideTyping(){document.getElementById('typingWrap').classList.remove('show')}
+function upStats(){document.getElementById('sMsgs').textContent=nMsgs;document.getElementById('sInts').textContent=nInts;document.getElementById('sConf').textContent=nInts?Math.round(confTotal/nInts)+'%':'—'}
+
+function updDbg(intent,conf,e){
+  document.getElementById('dInt').textContent=intent||'—';
+  document.getElementById('dConf').textContent=conf?Math.round(conf*100)+'%':'—';
+  document.getElementById('dState').textContent=sess.state;
+  document.getElementById('dPNR').textContent=e.pnr||'—';
+  document.getElementById('dTrain').textContent=e.train||'—';
+  document.getElementById('dFrom').textContent=e.fromC||'—';
+  document.getElementById('dTo').textContent=e.toC||'—';
+  document.getElementById('dDate').textContent=e.date||'—';
+  document.getElementById('dClass').textContent=e.cls||'—';
+}
+
+function addHist(intent,cp){
+  const h=document.getElementById('histList');
+  if(h.querySelector('[style*="italic"]'))h.innerHTML='';
+  const now=new Date(),t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const d=document.createElement('div');d.className='hi-item';
+  d.innerHTML=`<span class="ht">${t}</span><span class="hint">${intent.replace(/_/g,' ')}</span><span class="hc">${cp}%</span>`;
+  h.insertBefore(d,h.firstChild);
+}
+
+function addUserMsg(t){
+  purgeEmpty();
+  const d=document.createElement('div');d.className='mrow u';
+  d.innerHTML=`<div class="mav u2">You</div><div class="bub-wrap"><div class="bub">${esc(t)}</div></div>`;
+  document.getElementById('msgs').appendChild(d);scrollChat();
+  nMsgs++;upStats();
+}
+
+function addBotMsg(t,opts,intent,conf){
+  purgeEmpty();
+  const cp=Math.round((conf||0)*100);
+  const cc=cp>=70?'var(--green)':cp>=40?'var(--amber)':'var(--red)';
+  const meta=(intent&&intent!=='greeting'&&intent!=='unknown')
+    ?`<div class="mmeta"><span class="ibadge">🎯 ${intent.replace(/_/g,' ')}</span><div class="cbar"><div class="cfill" style="width:${cp}%;background:${cc}"></div></div><span class="clbl">${cp}%</span></div>`:'';
+  const qr=opts&&opts.length?`<div class="qrs">${opts.map(o=>`<button class="qr" onclick="q('${o}')">${o}</button>`).join('')}</div>`:'';
+  const d=document.createElement('div');d.className='mrow bot';
+  d.innerHTML=`<div class="mav b">🤖</div><div class="bub-wrap"><div class="bub-name">RailSpeak</div><div class="bub">${t}${qr}</div>${meta}</div>`;
+  document.getElementById('msgs').appendChild(d);scrollChat();
+  nMsgs++;upStats();
+  if(intent&&intent!=='greeting'&&intent!=='unknown'){nInts++;confTotal+=cp;upStats();addHist(intent,cp);}
+  if(ttsOn)speak(t);
+}
+
+/* ══ SEND ══════════════════════════════════════ */
+function send(){
+  const inp=document.getElementById('inp'),text=inp.value.trim();if(!text)return;
+  inp.value='';addUserMsg(text);showTyping();
+  setTimeout(()=>{
+    hideTyping();
+    const[intent,conf]=detectIntent(text);
+    const ents=extractEntities(text);
+    const resp=dialogue(text,intent,conf,ents);
+    addBotMsg(resp.msg,resp.opts,intent,conf,ents);
+    updDbg(intent,conf,ents);
+  },550+Math.random()*300);
+}
+function q(text){document.getElementById('inp').value=text;send();}
+
+/* ══ DTMF ══════════════════════════════════════ */
+const DMAP={'1':'Check PNR status','2':'Book a ticket','3':'Track my train','4':'Train schedule','5':'Fare enquiry','6':'Cancel ticket','9':'I have a complaint','0':'Exit'};
+function dtmf(k){dtmfBuf+=k;document.getElementById('dtmfOut').textContent=dtmfBuf||'—';if(DMAP[k]){setTimeout(()=>{q(DMAP[k]);clearDTMF();},180);}else if(dtmfBuf.length===10&&/^\d{10}$/.test(dtmfBuf)){setTimeout(()=>{q('Check PNR '+dtmfBuf);clearDTMF();},180);}}
+function clearDTMF(){dtmfBuf='';document.getElementById('dtmfOut').textContent='—';}
+
+/* ══ VOICE ═════════════════════════════════════ */
+function setupSTT(){
+  if(recog) return; // already set up
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setVS('⚠ Voice not supported — use Chrome');return;}
+  recog=new SR();recog.lang='en-IN';recog.continuous=false;recog.interimResults=true;
+  recog.onstart=()=>{
+    listening=true;
+    const mb=document.getElementById('micBtn');
+    if(mb){mb.classList.add('on');mb.textContent='🔴';}
+    setVS('🎤 Listening… speak now',true);
+  };
+  recog.onresult=(ev)=>{
+    let f='',i='';
+    for(const r of ev.results){if(r.isFinal)f+=r[0].transcript;else i+=r[0].transcript;}
+    document.getElementById('inp').value=f||i;
+  };
+  recog.onend=()=>{
+    listening=false;
+    const mb=document.getElementById('micBtn');
+    if(mb){mb.classList.remove('on');mb.textContent='🎤';}
+    setVS('Press 🎤 or type your query above');
+    const v=document.getElementById('inp').value.trim();
+    if(v) send();
+  };
+  recog.onerror=(ev)=>{
+    listening=false;
+    const mb=document.getElementById('micBtn');
+    if(mb){mb.classList.remove('on');mb.textContent='🎤';}
+    setVS('Voice error: '+ev.error);
+  };
+}
+function toggleMic(){
+  if(!recog){setupSTT();}
+  if(!recog){setVS('⚠ Use Chrome for voice support');return;}
+  if(listening){recog.stop();}
+  else{document.getElementById('inp').value='';try{recog.start();}catch(e){setVS('Mic error — try again');}}
+}
+function setVS(msg,active){const el=document.getElementById('vstatus');if(el){el.textContent=msg;el.className='vstatus'+(active?' rec':'');}}
+
+/* ══ TTS ════════════════════════════════════════ */
+function speak(t){
+  if(!ttsOn||!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t.replace(/<[^>]+>/g,'').replace(/[📋🎫📍🕐💰❌📢⚡🙏🤔✅⚠️🔔🔗🟡🚂]/g,''));
+  u.lang='en-IN';u.rate=0.94;u.pitch=1.05;
+  const vs=window.speechSynthesis.getVoices();
+  const pv=vs.find(v=>v.lang==='en-IN')||vs.find(v=>v.lang.startsWith('en'));
+  if(pv)u.voice=pv;window.speechSynthesis.speak(u);
+}
+function toggleTTS(){
+  ttsOn=!ttsOn;
+  document.getElementById('ttsBtn').classList.toggle('on',ttsOn);
+  document.getElementById('ttsBtn').firstChild.textContent=ttsOn?'🔊 ':'🔇 ';
+  document.getElementById('ttsLbl').textContent=ttsOn?'Voice On':'Voice Off';
+}
+
+/* ══ MODE ══════════════════════════════════════ */
+function setMode(m){
+  // IDs exactly match HTML: btnChat, btnVoice, btnDTMF
+  document.getElementById('btnChat').classList.toggle('on', m==='chat');
+  document.getElementById('btnVoice').classList.toggle('on', m==='voice');
+  document.getElementById('btnDTMF').classList.toggle('on', m==='dtmf');
+  document.getElementById('dtmfSec').style.display = m==='dtmf' ? 'block' : 'none';
+  if(m==='voice'){
+    if(!recog) setupSTT();
+    // small delay so recog is ready
+    setTimeout(()=>{ if(!listening) toggleMic(); }, 100);
+  } else {
+    // stop mic if switching away from voice mode
+    if(listening && recog) recog.stop();
+  }
+}
+
+/* ══ RESET / EXPORT ════════════════════════════ */
+function resetChat(){
+  sess={state:'welcome',intent:null,ents:{}};emptyPurged=false;
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('histList').innerHTML='<div style="font-size:11px;color:var(--ink4);font-style:italic">No queries yet</div>';
+  document.getElementById('resSec').style.display='none';
+  nMsgs=0;nInts=0;confTotal=0;upStats();updDbg(null,null,{});
+  init();
+}
+function exportChat(){
+  const rows=document.querySelectorAll('.mrow');
+  let out='RailSpeak Chat Export\n'+new Date().toLocaleString()+'\n'+'─'.repeat(40)+'\n\n';
+  rows.forEach(r=>{const role=r.classList.contains('u')?'You':'RailSpeak';const txt=r.querySelector('.bub')?.innerText?.trim()||'';out+=`[${role}]: ${txt}\n\n`;});
+  const a=document.createElement('a');a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(out);a.download='railspeak-chat.txt';a.click();
+}
+
+/* ══ INIT ══════════════════════════════════════ */
+function init(){
+  const m=document.getElementById('msgs');
+  m.innerHTML=`<div class="es">
+    <div class="es-ico">🚂</div>
+    <div class="es-ti">Welcome to RailSpeak</div>
+    <div class="es-sb">IRCTC's Conversational IVR — ask about tickets, PNR, trains and more</div>
+    <div class="es-chips">
+      <span class="es-chip" onclick="q('Check PNR 1234567890')">📋 Check PNR</span>
+      <span class="es-chip" onclick="q('Book ticket from Delhi to Mumbai 15 April sleeper')">🎫 Book Ticket</span>
+      <span class="es-chip" onclick="q('Live status train 12951')">📍 Track Train</span>
+      <span class="es-chip" onclick="q('Fare from Delhi to Bangalore 3AC')">💰 Fare Enquiry</span>
+    </div>
+  </div>`;
+  setTimeout(()=>{
+    purgeEmpty();
+    addBotMsg(
+      `<b>Namaste! 🙏 Welcome to RailSpeak</b><br>IRCTC's Conversational IVR Assistant<br><br>I can help you with <b>PNR status</b>, <b>ticket booking</b> (including ⚡ Tatkal), <b>live train tracking</b>, <b>schedules</b>, <b>fares</b>, <b>cancellations</b> and <b>complaints</b>.<br><br>How can I assist you today?`,
+      ['Check PNR status','Book a ticket','Track my train','Fare enquiry'],
+      null,null,{}
+    );
+    sess.state='idle';
+  },600);
+}
+
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
