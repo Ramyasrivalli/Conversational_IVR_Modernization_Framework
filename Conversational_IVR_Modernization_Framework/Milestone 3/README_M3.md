@@ -1,13 +1,48 @@
 # 🚂 IRCTC Conversational IVR — Milestone 3
 ### Web Simulator with Speech-to-Text · NLU · Text-to-Speech
 
+> **Project:** Conversational IVR Modernization Framework
+> **Author:** M. Ramya Srivalli | Infosys Intern | Batch 13, Group-2
+> **Organization:** Infosys Internship Project
+
 ---
 
 ## 🌐 Live Demo
 
-👉 **https://railspeak.netlify.app**
+👉 **[https://ticket-assistant--24b01a4278.replit.app](https://ticket-assistant--24b01a4278.replit.app)**
 
 > Open in **Chrome or Edge** → Allow microphone → Start talking!
+
+---
+
+## 🖥️ Run Locally
+
+```
+https://glorious-trout-5g9xwv77j5pgcpvjj-8000.app.github.dev/irctc_m3.html
+```
+
+Or with VS Code Live Server → right-click `irctc_m3.html` → Open with Live Server → `http://localhost:5500/irctc_m3.html`
+
+> ⚠️ **Voice input (STT) requires Chrome or Edge** — Firefox does not support Web Speech API.
+
+---
+
+## 📌 What is Milestone 3?
+
+Milestone 3 upgrades the DTMF-only simulator from Milestone 2 into a **fully conversational AI IVR**. Users can now speak naturally — or type — instead of pressing number buttons.
+
+**Milestone 2 (DTMF Only):**
+```
+System: "Press 1 for PNR status, Press 2 for ticket booking..."
+User:   *Clicks button "1"*
+```
+
+**Milestone 3 (Conversational AI):**
+```
+System: "Namaste! How can I assist you today?"
+User:   "I want to check my PNR status for 1234567890"
+System: "✅ CONFIRMED | Coach B4 | Berth 32 (Lower) | Platform 3"
+```
 
 ---
 
@@ -15,27 +50,47 @@
 
 | Feature | M2 | M3 |
 |---------|----|----|
-| Input Method | DTMF buttons only | Voice + Text + DTMF |
+| Input Method | DTMF buttons only | ✅ Voice + Text + DTMF |
 | Speech-to-Text | ❌ | ✅ Web Speech API |
 | Intent Detection | ❌ | ✅ Keyword + Regex NLU |
 | Entity Extraction | ❌ | ✅ Stations, PNR, Date, Class |
 | Text-to-Speech | ❌ | ✅ SpeechSynthesis API |
-| Multi-turn Session | ❌ | ✅ State machine |
+| Multi-turn Session | ❌ | ✅ State machine dialogue |
 | Debug Panel | ❌ | ✅ Live intent + confidence |
+| Session Stats | ❌ | ✅ Messages, intents, avg confidence |
+| Result Cards | ❌ | ✅ PNR / Booking / Tracking cards |
+
+---
+
+## 🏗️ Architecture
+
+Milestone 3 runs **entirely in the browser**. Zero backend. Zero API keys. Zero cost.
+
+```
+Browser (Chrome / Edge)
+│
+├── 🎤 Web Speech API     → Voice input (STT) via Google's built-in model
+├── 🧠 Intent Detection   → Regex + keyword NLU in JavaScript
+├── 🔍 Entity Extraction  → Stations, PNR, dates, travel class
+├── 💬 Dialogue Manager   → State machine, multi-turn context
+├── 🖥️  UI Renderer       → Chat bubbles, quick replies, result cards
+└── 🔊 SpeechSynthesis   → Voice output (TTS), browser-native
+```
 
 ---
 
 ## 🗣️ Supported Intents
 
-| Intent | Example |
+| Intent | Example Utterance |
 |--------|---------|
-| Book Ticket | "I want to book a ticket from Delhi to Mumbai" |
-| PNR Status | "Check PNR 1234567890" |
-| Train Schedule | "Schedule of train 12951" |
-| Cancel Ticket | "I want to cancel my ticket" |
-| Fare Enquiry | "What is the fare from Delhi to Bangalore?" |
-| Running Status | "Is my train running late?" |
-| Complaint | "I have a complaint" |
+| 🎫 Book Ticket | "Book a ticket from Delhi to Mumbai on 15 April sleeper" |
+| 📋 PNR Status | "Check PNR 1234567890" |
+| 📍 Live Train Tracking | "Live status of train 12951" |
+| 🕐 Train Schedule | "Schedule of train 12301" |
+| ❌ Cancel Ticket | "I want to cancel my ticket PNR 9876543210" |
+| 💰 Fare Enquiry | "What is the fare from Delhi to Bangalore 3AC?" |
+| ⚡ Tatkal Booking | "Tatkal ticket from Bangalore to Chennai tomorrow" |
+| 📢 Complaint | "I have a complaint about food quality" |
 
 ---
 
@@ -46,63 +101,84 @@
 Book ticket from Delhi to Mumbai on 15 April sleeper class
 ```
 
-**Step-by-step:**
+**Step-by-step (multi-turn):**
 ```
-1. "Book a ticket"
-2. "Delhi"
-3. "Mumbai"
-4. "15 April"
-5. "Sleeper"
+"Book a ticket" → "Delhi" → "Mumbai" → "15 April" → "Sleeper"
 ```
 
-**PNR Check** — Sample PNRs to try:
-- `1234567890` → CONFIRMED
-- `9876543210` → RAC
-- `5555555555` → Waitlist
+**Sample PNRs to try:**
+
+| PNR | Expected Result |
+|-----|----------------|
+| `1234567890` | ✅ CONFIRMED — Train 12951, Coach B4, Berth 32, Platform 3 |
+| `9876543210` | 🟡 RAC 12 — Train 12630, Coach A2, Platform 1 |
+| `5555555555` | ❌ WL 89 — Train 12483 |
+| `4444444444` | ✅ CONFIRMED — Train 22119, Coach H1, Berth 05, Platform 5 |
+
+**Sample train numbers to track:** `12951`, `12301`, `12630`, `22119`, `12002`
 
 ---
 
-## 🏗️ Architecture
+## ⚙️ Three Input Modes
 
-```
-Browser (Chrome/Edge)
-│
-├── 🎤 Web Speech API       → Voice input (STT)
-├── 🧠 Intent Detection     → NLU in JavaScript (no API needed)
-├── 🔍 Entity Extraction    → Stations, PNR, Date, Class
-├── 💬 Dialogue Manager     → State machine, multi-turn context
-└── 🔊 SpeechSynthesis      → Voice output (TTS)
-```
-
-**Zero backend. Zero API keys. Zero cost. Runs entirely in browser.**
+| Mode | How to Use |
+|------|-----------|
+| **Text Chat** | Type query and press Enter or ➤ |
+| **Voice (STT)** | Click 🎤 → speak → auto-sends when done |
+| **DTMF Keypad** | 1=PNR · 2=Book · 3=Track · 4=Schedule · 5=Fare · 6=Cancel · 9=Complaint · 0=Exit |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-repo/
-├── irctc_simulator_m3.html   ← Milestone 3 (this milestone)
-├── irctc_ui.html             ← Milestone 2 DTMF simulator
-├── irctc_backend.py          ← Optional FastAPI backend
-└── README_M3.md              ← This file
+Conversational_IVR_Modernization_Framework/
+├── Milestone 2/
+│   ├── README_M2.md
+│   ├── irctc_backend.py       ← FastAPI integration layer
+│   └── irctc_ui.html          ← M2 DTMF simulator
+├── Milestone 3/
+│   ├── README_M3.md           ← This file
+│   └── irctc_m3.html          ← M3 Conversational simulator
+├── LICENSE
+├── README.md
+├── milestone1.pdf
+└── ramya_agile.xls
 ```
 
 ---
 
-## 🚀 Run Locally
+## 🛣️ Milestone Roadmap
 
-
-```
-Open: `http://localhost:5500/irctc_simulator_m3.html`
-
+| Milestone | Status | Description |
+|-----------|--------|-------------|
+| M1 | ✅ Complete | Legacy system analysis & requirements |
+| M2 | ✅ Complete | FastAPI integration layer + DTMF simulator |
+| M3 | ✅ Complete | Conversational AI — Voice + NLU + TTS |
+| M4 | 🔄 Upcoming | Real phone IVR via Twilio / Azure ACS |
 
 ---
 
-## 📞 Note on Real Phone IVR
+## 🧰 Tech Stack
 
-This simulator demonstrates the complete conversational AI layer.
-In production (Milestone 4), the same NLU and dialogue logic would be
-triggered via an incoming call to a **Twilio / Azure ACS** phone number.
-The intent detection and state machine remain identical — only STT/TTS
-would shift to cloud services (Azure Speech).
+| Component | Technology |
+|-----------|-----------|
+| Language | Vanilla JavaScript (ES6+) |
+| Speech-to-Text | Web Speech API (browser-native) |
+| Text-to-Speech | SpeechSynthesis API (browser-native) |
+| NLU Engine | Custom Regex + Keyword matching |
+| Dialogue Manager | JavaScript state machine |
+| Live Demo | Replit |
+| Local Dev | GitHub Codespaces |
+| Target Cloud (M4) | Azure Communication Services + BAP / Twilio |
+
+---
+
+## 🐛 Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| Voice button does nothing | Use Chrome or Edge — Firefox not supported |
+| Mic not working | Allow microphone access in browser settings |
+| Voice recognised incorrectly | Speak clearly; try typing the same query to test |
+| Bot says "I didn't understand" | Use keywords: "book", "PNR", "track", "fare", "cancel" — check NLU Debug panel |
