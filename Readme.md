@@ -28,7 +28,6 @@
 |----------|------|-------------|
 | 🚀 **M3 Live Demo** | [ticket-assistant--24b01a4278.replit.app](https://ticket-assistant--24b01a4278.replit.app) | Conversational IVR — voice + text + DTMF |
 | 🖥️ **M2 Live Demo** | [DTMF IVR Simulator](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | DTMF web simulator — keypad + JSON viewer |
-| 💻 **M3 Local Dev** | [GitHub Codespaces](https://glorious-trout-5g9xwv77j5pgcpvjj-8000.app.github.dev/irctc_m3.html) | Run M3 via GitHub Codespaces |
 | 📖 **M2 API Docs** | `http://localhost:8000/docs` | Swagger UI — run `python irctc_backend.py` first |
 | 📁 **Repository** | [github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework](https://github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework) | Full source code |
 
