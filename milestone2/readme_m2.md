@@ -6,6 +6,15 @@
 
 ---
 
+## 🌐 Live Demo
+
+👉 **[https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559)**
+
+> Click **START CALL** → use the DTMF keypad or service cards → see live JSON responses.
+> Note: API calls to the FastAPI backend will not respond in the static demo — the UI layout and simulator interface are fully visible.
+
+---
+
 ## 📌 What is Milestone 2?
 
 Milestone 2 builds the **integration layer** — the FastAPI middleware that sits between the browser/telephone front-end and the IRCTC backend services. It also delivers a fully functional web-based IVR simulator so the entire system can be tested and demonstrated without a real phone or paid cloud account.
@@ -466,12 +475,12 @@ This is intentional — Tatkal booking is time-gated to **10 AM–11 PM IST**. O
 
 ## 🛣️ Milestone Roadmap
 
-| Milestone | Status | Description |
-|-----------|--------|-------------|
-| **M1** | ✅ Complete | Legacy analysis & requirements gathering |
-| **M2** | ✅ Complete | Integration layer — **this milestone** |
-| **M3** | 🔜 Upcoming | Conversational AI — Voice + NLU + TTS |
-| **M4** | 🔜 Upcoming | Testing & deployment |
+| Milestone | Status | Demo | Description |
+|-----------|--------|------|-------------|
+| **M1** | ✅ Complete | — | Legacy analysis & requirements gathering |
+| **M2** | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | Integration layer — **this milestone** |
+| **M3** | 🔜 Upcoming | [▶ Live Demo](https://ticket-assistant--24b01a4278.replit.app) | Conversational AI — Voice + NLU + TTS |
+| **M4** | 🔜 Upcoming | — | Testing & deployment |
 
 ---
 
