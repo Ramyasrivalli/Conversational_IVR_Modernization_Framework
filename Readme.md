@@ -5,8 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal.svg)](https://fastapi.tiangolo.com)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Replit-orange.svg)](https://ticket-assistant--24b01a4278.replit.app)
-[![M3 Demo](https://img.shields.io/badge/M3%20Simulator-Browser-blueviolet.svg)](https://ticket-assistant--24b01a4278.replit.app)
+[![M3 Live Demo](https://img.shields.io/badge/M3%20Demo-Replit-orange.svg)](https://ticket-assistant--24b01a4278.replit.app)
+[![M2 Live Demo](https://img.shields.io/badge/M2%20Demo-Claude-blueviolet.svg)](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559)
 
 ---
 
@@ -26,12 +26,13 @@
 
 | Resource | Link | Description |
 |----------|------|-------------|
-| 🚀 **Live Demo (M3)** | [ticket-assistant--24b01a4278.replit.app](https://ticket-assistant--24b01a4278.replit.app) | Full conversational IVR — voice + text + DTMF |
-| 💻 **Local Dev (M3)** | [GitHub Codespaces](https://glorious-trout-5g9xwv77j5pgcpvjj-8000.app.github.dev/irctc_m3.html) | Run via GitHub Codespaces |
-| 📖 **API Docs (M2)** | `http://localhost:8000/docs` | Swagger UI — run backend first |
+| 🚀 **M3 Live Demo** | [ticket-assistant--24b01a4278.replit.app](https://ticket-assistant--24b01a4278.replit.app) | Conversational IVR — voice + text + DTMF |
+| 🖥️ **M2 Live Demo** | [DTMF IVR Simulator](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | DTMF web simulator — keypad + JSON viewer |
+| 💻 **M3 Local Dev** | [GitHub Codespaces](https://glorious-trout-5g9xwv77j5pgcpvjj-8000.app.github.dev/irctc_m3.html) | Run M3 via GitHub Codespaces |
+| 📖 **M2 API Docs** | `http://localhost:8000/docs` | Swagger UI — run `python irctc_backend.py` first |
 | 📁 **Repository** | [github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework](https://github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework) | Full source code |
 
-> ⚠️ Open the Live Demo in **Chrome or Edge** — Firefox does not support the Web Speech API (voice input).
+> ⚠️ Open M3 demo in **Chrome or Edge** — Firefox does not support the Web Speech API (voice input).
 
 ---
 
@@ -521,16 +522,45 @@ Full request/response examples with JSON: see **[Milestone_2/README_M2.md](Miles
 | GitHub Codespaces | Local development environment |
 | Render / Railway / Heroku | Backend hosting options |
 
+---
 
+## 🚀 Deployment Guide
+
+### M3 Simulator — Static Deployment (Zero Cost)
+
+| Platform | Steps |
+|----------|-------|
+| **Replit** | Create project → Upload `irctc_m3.html` → Rename to `index.html` → Run |
+| **Netlify Drop** | Go to `app.netlify.com/drop` → Create folder → Rename file to `index.html` → Drag folder → Get URL |
+| **GitHub Pages** | Push to repo → Settings → Pages → Deploy from `main` branch |
+| **Vercel** | `vercel deploy` from project folder |
+
+### M2 Backend — Server Deployment
+
+```bash
+# Render / Railway / Heroku
+# 1. Push to GitHub
+# 2. Connect repo to platform
+# 3. Set start command: uvicorn irctc_backend:app --host 0.0.0.0 --port $PORT
+
+# For production — replace in-memory sessions with Redis:
+# pip install redis
+# import redis; r = redis.Redis(host=REDIS_URL)
+```
+
+> **Never hardcode secrets.** Use environment variables for `ACS_CONN_STR`, `TWILIO_AUTH_TOKEN`, etc.
+
+---
 
 ## 📊 Project Roadmap
 
-| Milestone | Status | Description |
-|-----------|--------|-------------|
-| **M1** — Legacy Analysis | ✅ Complete | IRCTC IVR architecture review, integration requirements, 6-phase plan |
-| **M2** — Integration Layer | ✅ Complete | FastAPI backend (8 endpoints) + DTMF web simulator |
-| **M3** — Conversational AI | ✅ Complete | Voice + NLU + TTS browser simulator — zero cost, zero backend |
-| **M4** — Testing & Deployment | ✅ Complete | 30+ tests (unit/integration/E2E/load/error) + deployment guide |
+| Milestone | Status | Demo | Description |
+|-----------|--------|------|-------------|
+| **M1** — Legacy Analysis | ✅ Complete | — | IRCTC IVR architecture review, integration requirements, 6-phase plan |
+| **M2** — Integration Layer | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | FastAPI backend (8 endpoints) + DTMF web simulator |
+| **M3** — Conversational AI | ✅ Complete | [▶ Live Demo](https://ticket-assistant--24b01a4278.replit.app) | Voice + NLU + TTS browser simulator — zero cost, zero backend |
+| **M4** — Testing & Deployment | ✅ Complete | — | 30+ tests (unit/integration/E2E/load/error) + deployment guide |
+
 
 
 *For milestone-specific documentation, see the README inside each milestone folder.*
