@@ -24,8 +24,6 @@
 
 > ⚠️ **Must use Chrome or Edge.** Firefox does not support the Web Speech API.
 
-**Option 2 — Live Demo:**
-[ticket-assistant--24b01a4278.replit.app](https://ticket-assistant--24b01a4278.replit.app)
 
 ---
 
