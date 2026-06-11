@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>IRCTC IVR Simulator — M2 DTMF</title>
+<style>
+  :root{
+    --bg:#f0f4f8;--panel:#ffffff;--border:#e2e8f0;--primary:#1a56db;
+    --primary-dark:#1e40af;--success:#16a34a;--warn:#d97706;--danger:#dc2626;
+    --text:#1e293b;--muted:#64748b;--code-bg:#1e293b;--code-text:#e2e8f0;
+    --radius:10px;--shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  header{background:var(--primary);color:#fff;padding:14px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  header .logo{font-size:1.6rem;}
+  header h1{font-size:1.1rem;font-weight:700;}
+  header p{font-size:.8rem;opacity:.85;}
+  #health-badge{margin-left:auto;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.15);}
+  #health-badge.ok{background:#16a34a;}
+  #health-badge.fail{background:#dc2626;}
+
+  .grid{display:grid;grid-template-columns:280px 1fr 320px;gap:16px;padding:16px;height:calc(100vh - 60px);}
+
+  /* Panel base */
+  .panel{background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);
+         box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;}
+  .panel-head{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.9rem;
+              background:#f8fafc;display:flex;align-items:center;gap:8px;}
+  .panel-body{flex:1;overflow-y:auto;padding:14px;}
+
+  /* Controls panel */
+  .section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;margin-top:14px;}
+  .section-label:first-child{margin-top:0;}
+  input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:.88rem;outline:none;}
+  input[type=text]:focus{border-color:var(--primary);}
+  .btn{width:100%;padding:9px 12px;border:none;border-radius:6px;cursor:pointer;font-size:.88rem;font-weight:600;transition:.15s;}
+  .btn-primary{background:var(--primary);color:#fff;} .btn-primary:hover{background:var(--primary-dark);}
+  .btn-success{background:var(--success);color:#fff;} .btn-success:hover{filter:brightness(1.1);}
+  .btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary);} .btn-outline:hover{background:#eff6ff;}
+  .btn-danger{background:var(--danger);color:#fff;} .btn-danger:hover{filter:brightness(1.1);}
+  .btn+.btn{margin-top:6px;}
+
+  /* DTMF keypad */
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px;}
+  .key{padding:12px 0;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.1rem;
+       font-weight:700;text-align:center;background:#f8fafc;transition:.1s;}
+  .key:hover{background:var(--primary);color:#fff;}
+  .key:active{transform:scale(.95);}
+
+  /* Service cards */
+  .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .svc-card{padding:10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;
+            text-align:center;background:#f8fafc;transition:.15s;}
+  .svc-card:hover{border-color:var(--primary);background:#eff6ff;color:var(--primary);}
+  .svc-card .icon{font-size:1.4rem;display:block;margin-bottom:3px;}
+
+  /* Call log */
+  .log-entry{padding:8px 12px;border-radius:6px;margin-bottom:8px;font-size:.84rem;border-left:3px solid transparent;}
+  .log-entry.info{background:#eff6ff;border-color:var(--primary);}
+  .log-entry.success{background:#f0fdf4;border-color:var(--success);}
+  .log-entry.warn{background:#fffbeb;border-color:var(--warn);}
+  .log-entry.error{background:#fef2f2;border-color:var(--danger);}
+  .log-time{font-size:.72rem;color:var(--muted);font-family:monospace;}
+
+  /* Flow steps */
+  .steps{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+  .step{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;font-size:.82rem;}
+  .step.done{background:#f0fdf4;color:var(--success);}
+  .step.active{background:#eff6ff;color:var(--primary);font-weight:600;}
+  .step.pending{background:#f8fafc;color:var(--muted);}
+  .step-icon{font-size:1rem;width:20px;text-align:center;}
+
+  /* Stats */
+  .stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.84rem;}
+  .stat-val{font-weight:700;color:var(--primary);}
+
+  /* JSON viewer */
+  .json-box{background:var(--code-bg);color:var(--code-text);border-radius:8px;padding:12px;
+            font-family:'Consolas','Courier New',monospace;font-size:.76rem;overflow:auto;
+            max-height:260px;white-space:pre-wrap;word-break:break-all;margin-top:6px;}
+
+  /* API history */
+  .api-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:4px;font-size:.78rem;
+            border-bottom:1px solid var(--border);}
+  .api-method{font-weight:700;font-size:.72rem;background:var(--primary);color:#fff;
+              padding:2px 5px;border-radius:3px;}
+  .api-path{font-family:monospace;flex:1;}
+  .api-status.ok{color:var(--success);font-weight:700;}
+  .api-status.fail{color:var(--danger);font-weight:700;}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;}
+  .badge-green{background:#dcfce7;color:#16a34a;}
+  .badge-yellow{background:#fef9c3;color:#a16207;}
+  .badge-red{background:#fee2e2;color:#b91c1c;}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">🚂</span>
+  <div><h1>IRCTC IVR Simulator — Milestone 2</h1><p>DTMF Integration Layer · FastAPI Backend</p></div>
+  <span id="health-badge">⏳ Checking...</span>
+</header>
+
+<div class="grid">
+
+  <!-- LEFT: Controls -->
+  <div class="panel">
+    <div class="panel-head">🎛️ Controls</div>
+    <div class="panel-body">
+
+      <div class="section-label">Session</div>
+      <button class="btn btn-primary" onclick="startCall()">📞 Start New Call</button>
+      <button class="btn btn-danger" onclick="endCall()">📵 End Call</button>
+
+      <div class="section-label" style="margin-top:16px">PNR Lookup</div>
+      <input id="pnr-input" type="text" placeholder="e.g. 1234567890" maxlength="10"/>
+      <button class="btn btn-success" style="margin-top:6px" onclick="checkPNR()">🔍 Check PNR</button>
+
+      <div class="section-label">Train Tracking</div>
+      <input id="train-input" type="text" placeholder="e.g. 12951" maxlength="5"/>
+      <button class="btn btn-success" style="margin-top:6px" onclick="trackTrain()">📍 Track Train</button>
+
+      <div class="section-label">DTMF Keypad</div>
+      <div class="keypad">
+        <div class="key" onclick="dtmf('1')">1</div><div class="key" onclick="dtmf('2')">2</div><div class="key" onclick="dtmf('3')">3</div>
+        <div class="key" onclick="dtmf('4')">4</div><div class="key" onclick="dtmf('5')">5</div><div class="key" onclick="dtmf('6')">6</div>
+        <div class="key" onclick="dtmf('7')">7</div><div class="key" onclick="dtmf('8')">8</div><div class="key" onclick="dtmf('9')">9</div>
+        <div class="key" onclick="dtmf('*')">*</div><div class="key" onclick="dtmf('0')">0</div><div class="key" onclick="dtmf('#')">#</div>
+      </div>
+
+      <div class="section-label">Quick Services</div>
+      <div class="svc-grid">
+        <div class="svc-card" onclick="quickPNR('1234567890')"><span class="icon">📋</span>Confirmed PNR</div>
+        <div class="svc-card" onclick="quickPNR('9876543210')"><span class="icon">🟡</span>RAC PNR</div>
+        <div class="svc-card" onclick="quickPNR('5555555555')"><span class="icon">❌</span>WL PNR</div>
+        <div class="svc-card" onclick="quickTrain('12951')"><span class="icon">🚆</span>Rajdhani</div>
+        <div class="svc-card" onclick="quickTrain('12301')"><span class="icon">🚈</span>Howrah Raj</div>
+        <div class="svc-card" onclick="tatkalNow()"><span class="icon">⚡</span>Tatkal</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MIDDLE: Call Log + Steps -->
+  <div class="panel">
+    <div class="panel-head">📋 Call Log</div>
+    <div class="panel-body" id="call-log">
+      <div class="log-entry info">
+        <div class="log-time">Waiting...</div>
+        <div>Click <b>Start New Call</b> to begin a session.</div>
+      </div>
+    </div>
+
+    <div style="padding:12px 16px;border-top:1px solid var(--border)">
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">📊 Call Flow Steps</div>
+      <div class="steps" id="flow-steps">
+        <div class="step pending"><span class="step-icon">○</span> Session Start</div>
+        <div class="step pending"><span class="step-icon">○</span> Welcome Prompt</div>
+        <div class="step pending"><span class="step-icon">○</span> DTMF Input</div>
+        <div class="step pending"><span class="step-icon">○</span> Service Selection</div>
+        <div class="step pending"><span class="step-icon">○</span> Data Lookup</div>
+        <div class="step pending"><span class="step-icon">○</span> Response Delivered</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Stats + JSON + History -->
+  <div class="panel">
+    <div class="panel-head">📈 Stats & Response</div>
+    <div class="panel-body">
+
+      <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">Session Stats</div>
+      <div class="stat-row"><span>Active Session</span><span id="stat-session" class="stat-val">—</span></div>
+      <div class="stat-row"><span>Current Flow</span><span id="stat-flow" class="stat-val">—</span></div>
+      <div class="stat-row"><span>API Calls</span><span id="stat-calls" class="stat-val">0</span></div>
+      <div class="stat-row"><span>Server Status</span><span id="stat-server" class="stat-val">—</span></div>
+
+      <div style="font-weight:700;font-size:.85rem;margin:14px 0 6px">Last Response</div>
+      <div class="json-box" id="json-viewer">// Response JSON will appear here</div>
+
+      <div style="font-weight:700;font-size:.85rem;margin:14px 0 6px">API Call History</div>
+      <div id="api-history"></div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BASE = 'http://localhost:8000';
+let sessionId = null;
+let apiCallCount = 0;
+
+// ── Health Check ─────────────────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const r = await fetch(BASE + '/health');
+    const d = await r.json();
+    const badge = document.getElementById('health-badge');
+    if (d.status === 'healthy') {
+      badge.textContent = '✅ Server Online';
+      badge.className = 'ok';
+      document.getElementById('stat-server').textContent = 'Online';
+    }
+  } catch {
+    const badge = document.getElementById('health-badge');
+    badge.textContent = '❌ Server Offline';
+    badge.className = 'fail';
+    document.getElementById('stat-server').textContent = 'Offline';
+  }
+}
+checkHealth();
+setInterval(checkHealth, 10000);
+
+// ── Logging ───────────────────────────────────────────────────────────────────
+function log(msg, type = 'info') {
+  const log = document.getElementById('call-log');
+  const d = document.createElement('div');
+  d.className = 'log-entry ' + type;
+  const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.innerHTML = `<div class="log-time">${t}</div><div>${msg}</div>`;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+function showJSON(obj) {
+  document.getElementById('json-viewer').textContent = JSON.stringify(obj, null, 2);
+}
+
+function addAPIHistory(method, path, ok) {
+  const h = document.getElementById('api-history');
+  const d = document.createElement('div');
+  d.className = 'api-item';
+  d.innerHTML = `<span class="api-method">${method}</span><span class="api-path">${path}</span><span class="api-status ${ok?'ok':'fail'}">${ok?'✅':'❌'}</span>`;
+  h.insertBefore(d, h.firstChild);
+  if (h.children.length > 10) h.removeChild(h.lastChild);
+  document.getElementById('stat-calls').textContent = ++apiCallCount;
+}
+
+// ── Step Tracker ──────────────────────────────────────────────────────────────
+function setStep(index) {
+  const steps = document.getElementById('flow-steps').children;
+  for (let i = 0; i < steps.length; i++) {
+    if (i < index) { steps[i].className = 'step done'; steps[i].querySelector('.step-icon').textContent = '✓'; }
+    else if (i === index) { steps[i].className = 'step active'; steps[i].querySelector('.step-icon').textContent = '▶'; }
+    else { steps[i].className = 'step pending'; steps[i].querySelector('.step-icon').textContent = '○'; }
+  }
+}
+
+// ── API Helper ────────────────────────────────────────────────────────────────
+async function api(method, path, body = null) {
+  try {
+    const opts = { method, headers: {'Content-Type':'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const r = await fetch(BASE + path, opts);
+    const d = await r.json();
+    showJSON(d);
+    addAPIHistory(method, path, r.ok);
+    return d;
+  } catch (e) {
+    log(`❌ Network error: ${e.message}`, 'error');
+    addAPIHistory(method, path, false);
+    return null;
+  }
+}
+
+// ── Core Actions ──────────────────────────────────────────────────────────────
+async function startCall() {
+  log('📞 Dialling IRCTC 139...', 'info');
+  setStep(0);
+  const d = await api('POST', '/ivr/start', { caller_id: '+91-9999999999', language: 'en' });
+  if (!d) return;
+  sessionId = d.session_id;
+  document.getElementById('stat-session').textContent = sessionId.slice(0, 8) + '...';
+  document.getElementById('stat-flow').textContent = 'main_menu';
+  log(`✅ Session started: ${sessionId.slice(0,8)}...`, 'success');
+  log(`🔊 ${d.message}`, 'info');
+  setStep(1);
+}
+
+async function endCall() {
+  if (!sessionId) { log('⚠️ No active session.', 'warn'); return; }
+  log('📵 Call ended. Session closed.', 'warn');
+  sessionId = null;
+  document.getElementById('stat-session').textContent = '—';
+  document.getElementById('stat-flow').textContent = '—';
+  setStep(-1);
+}
+
+async function dtmf(digit) {
+  if (!sessionId) { log('⚠️ Start a call first.', 'warn'); return; }
+  log(`🔢 Pressed: ${digit}`, 'info');
+  setStep(2);
+  const d = await api('POST', '/ivr/input', { session_id: sessionId, digit, current_flow: 'main_menu' });
+  if (!d) return;
+  document.getElementById('stat-flow').textContent = d.flow;
+  log(`📣 ${d.message}`, d.valid ? 'success' : 'warn');
+  setStep(3);
+}
+
+async function checkPNR() {
+  const pnr = document.getElementById('pnr-input').value.trim();
+  if (!pnr) { log('⚠️ Enter a PNR number.', 'warn'); return; }
+  if (!sessionId) await startCall();
+  setStep(4);
+  log(`🔍 Looking up PNR: ${pnr}`, 'info');
+  const d = await api('POST', '/ivr/pnr', { session_id: sessionId, pnr_number: pnr });
+  if (!d) return;
+  const badge = d.status === 'CONFIRMED' ? '✅' : d.status.startsWith('RAC') ? '🟡' : '❌';
+  log(`${badge} ${d.message}`, d.status === 'CONFIRMED' ? 'success' : 'warn');
+  setStep(5);
+}
+
+async function trackTrain() {
+  const tn = document.getElementById('train-input').value.trim();
+  if (!tn) { log('⚠️ Enter a train number.', 'warn'); return; }
+  if (!sessionId) await startCall();
+  setStep(4);
+  log(`📍 Tracking train: ${tn}`, 'info');
+  const d = await api('POST', '/ivr/tracking', { session_id: sessionId, train_number: tn });
+  if (!d) return;
+  log(`🚆 ${d.message}`, 'success');
+  setStep(5);
+}
+
+function quickPNR(pnr) { document.getElementById('pnr-input').value = pnr; checkPNR(); }
+function quickTrain(tn) { document.getElementById('train-input').value = tn; trackTrain(); }
+
+async function tatkalNow() {
+  if (!sessionId) await startCall();
+  const d = await api('POST', '/ivr/tatkal', {
+    session_id: sessionId, train_number: '12951',
+    from_station: 'NDLS', to_station: 'BCT', travel_class: '3A'
+  });
+  if (!d) return;
+  log(d.window_open ? `⚡ ${d.message}` : `⏰ ${d.message}`, d.window_open ? 'success' : 'warn');
+}
+</script>
+</body>
+</html>
