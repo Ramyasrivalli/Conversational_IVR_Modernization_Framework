@@ -26,8 +26,8 @@
 
 | Resource | Link | Description |
 |----------|------|-------------|
-| 🚀 **M3 Live Demo** | [ticket-assistant--24b01a4278.replit.app](https://irctc-conversational-ivrm-3--bannu04057.replit.app) | Conversational IVR — voice + text + DTMF |
-| 🖥️ **M2 Live Demo** | [DTMF IVR Simulator](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | DTMF web simulator — keypad + JSON viewer |
+| 🚀 **M3 Live Demo** | [m3 demo](https://claude.ai/public/artifacts/fff2ac45-175f-4f33-a2d7-98ea57441ad5) | Conversational IVR — voice + text + DTMF |
+| 🖥️ **M2 Live Demo** | [DTMF IVR Simulator](https://claude.ai/public/artifacts/f48dc9c9-b01f-4a47-9e79-2a1ce3ff5d32) | DTMF web simulator — keypad + JSON viewer |
 | 📖 **M2 API Docs** | `http://localhost:8000/docs` | Swagger UI — run `python irctc_backend.py` first |
 | 📁 **Repository** | [github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework](https://github.com/Ramyasrivalli/Conversational_IVR_Modernization_Framework) | Full source code |
 
@@ -556,8 +556,8 @@ Full request/response examples with JSON: see **[Milestone_2/README_M2.md](Miles
 | Milestone | Status | Demo | Description |
 |-----------|--------|------|-------------|
 | **M1** — Legacy Analysis | ✅ Complete | — | IRCTC IVR architecture review, integration requirements, 6-phase plan |
-| **M2** — Integration Layer | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559) | FastAPI backend (8 endpoints) + DTMF web simulator |
-| **M3** — Conversational AI | ✅ Complete | [▶ Live Demo](https://ticket-assistant--24b01a4278.replit.app) | Voice + NLU + TTS browser simulator — zero cost, zero backend |
+| **M2** — Integration Layer | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/f48dc9c9-b01f-4a47-9e79-2a1ce3ff5d32) | FastAPI backend (8 endpoints) + DTMF web simulator |
+| **M3** — Conversational AI | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/fff2ac45-175f-4f33-a2d7-98ea57441ad5) | Voice + NLU + TTS browser simulator — zero cost, zero backend |
 | **M4** — Testing & Deployment | ✅ Complete | — | 30+ tests (unit/integration/E2E/load/error) + deployment guide |
 
 
