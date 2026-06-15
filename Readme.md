@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal.svg)](https://fastapi.tiangolo.com)
-[![M3 Live Demo](https://img.shields.io/badge/M3%20Demo-Replit-orange.svg)](https://ticket-assistant--24b01a4278.replit.app)
+[![M3 Live Demo](https://img.shields.io/badge/M3%20Demo-Replit-orange.svg)](https://claude.ai/public/artifacts/fff2ac45-175f-4f33-a2d7-98ea57441ad5)
 [![M2 Live Demo](https://img.shields.io/badge/M2%20Demo-Claude-blueviolet.svg)](https://claude.ai/public/artifacts/7314443d-8b04-4358-91c7-a0475344d02b)
 
 ---
