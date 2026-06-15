@@ -23,14 +23,12 @@
 
   .grid{display:grid;grid-template-columns:280px 1fr 320px;gap:16px;padding:16px;height:calc(100vh - 60px);}
 
-  /* Panel base */
   .panel{background:var(--panel);border-radius:var(--radius);border:1px solid var(--border);
          box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden;}
   .panel-head{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700;font-size:.9rem;
               background:#f8fafc;display:flex;align-items:center;gap:8px;}
   .panel-body{flex:1;overflow-y:auto;padding:14px;}
 
-  /* Controls panel */
   .section-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;margin-top:14px;}
   .section-label:first-child{margin-top:0;}
   input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:.88rem;outline:none;}
@@ -42,21 +40,18 @@
   .btn-danger{background:var(--danger);color:#fff;} .btn-danger:hover{filter:brightness(1.1);}
   .btn+.btn{margin-top:6px;}
 
-  /* DTMF keypad */
   .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px;}
   .key{padding:12px 0;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.1rem;
        font-weight:700;text-align:center;background:#f8fafc;transition:.1s;}
   .key:hover{background:var(--primary);color:#fff;}
   .key:active{transform:scale(.95);}
 
-  /* Service cards */
   .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
   .svc-card{padding:10px;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:.78rem;
             text-align:center;background:#f8fafc;transition:.15s;}
   .svc-card:hover{border-color:var(--primary);background:#eff6ff;color:var(--primary);}
   .svc-card .icon{font-size:1.4rem;display:block;margin-bottom:3px;}
 
-  /* Call log */
   .log-entry{padding:8px 12px;border-radius:6px;margin-bottom:8px;font-size:.84rem;border-left:3px solid transparent;}
   .log-entry.info{background:#eff6ff;border-color:var(--primary);}
   .log-entry.success{background:#f0fdf4;border-color:var(--success);}
@@ -64,7 +59,6 @@
   .log-entry.error{background:#fef2f2;border-color:var(--danger);}
   .log-time{font-size:.72rem;color:var(--muted);font-family:monospace;}
 
-  /* Flow steps */
   .steps{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
   .step{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;font-size:.82rem;}
   .step.done{background:#f0fdf4;color:var(--success);}
@@ -72,16 +66,13 @@
   .step.pending{background:#f8fafc;color:var(--muted);}
   .step-icon{font-size:1rem;width:20px;text-align:center;}
 
-  /* Stats */
   .stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.84rem;}
   .stat-val{font-weight:700;color:var(--primary);}
 
-  /* JSON viewer */
   .json-box{background:var(--code-bg);color:var(--code-text);border-radius:8px;padding:12px;
             font-family:'Consolas','Courier New',monospace;font-size:.76rem;overflow:auto;
             max-height:260px;white-space:pre-wrap;word-break:break-all;margin-top:6px;}
 
-  /* API history */
   .api-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:4px;font-size:.78rem;
             border-bottom:1px solid var(--border);}
   .api-method{font-weight:700;font-size:.72rem;background:var(--primary);color:#fff;
@@ -94,12 +85,15 @@
   .badge-green{background:#dcfce7;color:#16a34a;}
   .badge-yellow{background:#fef9c3;color:#a16207;}
   .badge-red{background:#fee2e2;color:#b91c1c;}
+
+  .demo-notice{background:#fef9c3;border:1px solid #fbbf24;border-radius:8px;padding:10px 12px;
+               font-size:.78rem;color:#92400e;margin-bottom:12px;line-height:1.5;}
 </style>
 </head>
 <body>
 <header>
   <span class="logo">🚂</span>
-  <div><h1>IRCTC IVR Simulator — Milestone 2</h1><p>DTMF Integration Layer · FastAPI Backend</p></div>
+  <div><h1>IRCTC IVR Simulator — Milestone 2</h1><p>DTMF Integration Layer · Mock FastAPI Backend</p></div>
   <span id="health-badge">⏳ Checking...</span>
 </header>
 
@@ -109,6 +103,8 @@
   <div class="panel">
     <div class="panel-head">🎛️ Controls</div>
     <div class="panel-body">
+
+      <div class="demo-notice">🧪 <strong>Demo mode:</strong> Running with built-in mock backend — no server required. All data is simulated.</div>
 
       <div class="section-label">Session</div>
       <button class="btn btn-primary" onclick="startCall()">📞 Start New Call</button>
@@ -166,12 +162,11 @@
     </div>
   </div>
 
-  <!-- RIGHT: Stats + JSON + History -->
+  <!-- RIGHT: Stats + JSON -->
   <div class="panel">
     <div class="panel-head">📈 Stats & Response</div>
     <div class="panel-body">
 
-      <div style="font-weight:700;font-size:.85rem;margin-bottom:8px">Session Stats</div>
       <div class="stat-row"><span>Active Session</span><span id="stat-session" class="stat-val">—</span></div>
       <div class="stat-row"><span>Current Flow</span><span id="stat-flow" class="stat-val">—</span></div>
       <div class="stat-row"><span>API Calls</span><span id="stat-calls" class="stat-val">0</span></div>
@@ -189,40 +184,311 @@
 </div>
 
 <script>
-const BASE = 'http://localhost:8000';
+// ── Mock Backend ──────────────────────────────────────────────────────────────
+// Replaces http://localhost:8000 with in-browser JS functions
+// that mirror the exact FastAPI response shapes from irctc_backend.py
+
+const IST_OFFSET = 5.5 * 60; // minutes ahead of UTC
+
+function istNow() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+  return new Date(utc + IST_OFFSET * 60000);
+}
+
+function istGreeting() {
+  const h = istNow().getHours();
+  if (h >= 5 && h < 12) return "Suprabhat! Good Morning!";
+  if (h >= 12 && h < 17) return "Namaskar! Good Afternoon!";
+  if (h >= 17 && h < 21) return "Shubh Sandhya! Good Evening!";
+  return "Shubh Ratri! Good Night!";
+}
+
+function uuid4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+const SESSIONS = {};
+
+const PNR_DB = {
+  "1234567890": { status:"CONFIRMED", train_number:"12951", train_name:"Mumbai Rajdhani Express",
+    from_station:"NDLS", to_station:"BCT", departure:"16:55", arrival:"08:35+1",
+    coach:"B4", berth_number:"32", berth_type:"Lower", platform:"3" },
+  "9876543210": { status:"RAC 12", train_number:"12630", train_name:"Yeshwantpur Express",
+    from_station:"YPR", to_station:"HWH", departure:"21:30", arrival:"06:15+2",
+    coach:"A2", berth_number:"15", berth_type:"Side Lower", platform:"1" },
+  "5555555555": { status:"WL 89", train_number:"12483", train_name:"Amritsar Express",
+    from_station:"NDLS", to_station:"ASR", departure:"09:30", arrival:"19:20",
+    coach:"—", berth_number:"—", berth_type:"—", platform:"TBD" },
+  "4444444444": { status:"CONFIRMED", train_number:"22119", train_name:"Mumbai CSMT AC Express",
+    from_station:"LKO", to_station:"CSMT", departure:"14:05", arrival:"09:30+1",
+    coach:"H1", berth_number:"05", berth_type:"Upper", platform:"5" },
+};
+
+const TRAIN_DB = {
+  "12951": { name:"Mumbai Rajdhani Express", current_station:"Kota Junction",
+    current_station_code:"KOTA", next_station:"Ratlam Junction", next_station_code:"RTM",
+    scheduled_departure:"20:15", actual_departure:"20:27", delay_minutes:12,
+    delay_reason:"Signal hold at Sawai Madhopur", eta_destination:"08:47+1", on_time_reliability:94 },
+  "12301": { name:"Howrah Rajdhani Express", current_station:"Mughal Sarai Junction",
+    current_station_code:"MGS", next_station:"Allahabad Junction", next_station_code:"ALD",
+    scheduled_departure:"13:45", actual_departure:"13:45", delay_minutes:0,
+    delay_reason:null, eta_destination:"07:55+1", on_time_reliability:91 },
+  "12630": { name:"Yeshwantpur Express", current_station:"Wadi Junction",
+    current_station_code:"WADI", next_station:"Gulbarga", next_station_code:"GR",
+    scheduled_departure:"08:30", actual_departure:"08:42", delay_minutes:12,
+    delay_reason:"Late engine attachment at Yelahanka", eta_destination:"06:15+2", on_time_reliability:78 },
+  "22119": { name:"Mumbai CSMT AC Express", current_station:"Bhopal Junction",
+    current_station_code:"BPL", next_station:"Itarsi Junction", next_station_code:"ET",
+    scheduled_departure:"00:15", actual_departure:"00:20", delay_minutes:5,
+    delay_reason:"Crew change delay", eta_destination:"09:35+1", on_time_reliability:88 },
+  "12002": { name:"Bhopal Shatabdi Express", current_station:"Gwalior Junction",
+    current_station_code:"GWL", next_station:"Jhansi Junction", next_station_code:"JHS",
+    scheduled_departure:"11:55", actual_departure:"11:55", delay_minutes:0,
+    delay_reason:null, eta_destination:"14:05", on_time_reliability:97 },
+};
+
+const FARE_TABLE = {
+  "NDLS-BCT":  { SL:735,  "3A":1985, "2A":2865, "1A":4785, CC:null },
+  "NDLS-SBC":  { SL:1205, "3A":2785, "2A":4025, "1A":6675, CC:null },
+  "NDLS-MAS":  { SL:1265, "3A":3005, "2A":4345, "1A":7225, CC:null },
+  "BCT-SBC":   { SL:580,  "3A":1430, "2A":2050, "1A":null, CC:null },
+  "SBC-MAS":   { SL:300,  "3A":880,  "2A":1295, "1A":2145, CC:660  },
+};
+
+const TATKAL_SURCHARGE = { SL:150, "3A":400, "2A":600, "1A":900, CC:125 };
+
+const DTMF_MAP = {
+  "1": { flow:"pnr_status",     msg:"PNR Status service selected. Please enter your 10-digit PNR number." },
+  "2": { flow:"ticket_booking", msg:"Ticket Booking service selected. Please provide journey details." },
+  "3": { flow:"tatkal_booking", msg:"Tatkal Booking selected. Window is open from 10 AM to 11 PM IST." },
+  "4": { flow:"live_tracking",  msg:"Live Train Tracking selected. Please enter your 5-digit train number." },
+  "5": { flow:"cancellation",   msg:"Ticket Cancellation selected. Please enter your PNR number." },
+  "6": { flow:"fare_enquiry",   msg:"Fare Enquiry selected. Please enter route details." },
+  "7": { flow:"schedule",       msg:"Train Schedule selected. Enter your train number." },
+  "9": { flow:"agent",          msg:"Transferring to a live IRCTC support agent. Please hold." },
+  "0": { flow:"main_menu",      msg:"Main menu. Press 1 PNR, 2 Booking, 3 Tatkal, 4 Tracking, 5 Cancel, 9 Agent." },
+  "*": { flow:"main_menu",      msg:"Returning to main menu." },
+  "#": { flow:"confirm",        msg:"Confirmation received." },
+};
+
+// Mock API functions — mirror FastAPI endpoints
+const mockAPI = {
+
+  "GET /health": () => ({
+    status: "healthy",
+    service: "IRCTC IVR Backend",
+    version: "2.0.0 (mock)",
+    timestamp: new Date().toISOString(),
+    endpoints_active: 8,
+    sessions_active: Object.keys(SESSIONS).length,
+  }),
+
+  "POST /ivr/start": (body) => {
+    const sid = uuid4();
+    const greeting = istGreeting();
+    SESSIONS[sid] = {
+      session_id: sid, caller_id: body.caller_id || "+91-9999999999",
+      language: body.language || "en", flow: "main_menu",
+      created_at: new Date().toISOString(), history: ["session_start"],
+    };
+    return {
+      session_id: sid,
+      greeting_type: greeting.split("!")[0].toLowerCase(),
+      message: `${greeting} Welcome to IRCTC helpline 139. Press 1 for PNR status, 2 for ticket booking, 3 for Tatkal, 4 for live tracking, 5 to cancel, or 9 to speak with an agent.`,
+      tts_text: `${greeting} Welcome to I R C T C helpline. Press 1 for PNR status.`,
+      caller_id: body.caller_id || "+91-9999999999",
+      language: body.language || "en",
+      timestamp: new Date().toISOString(),
+    };
+  },
+
+  "POST /ivr/input": (body) => {
+    const digit = String(body.digit);
+    const mapped = DTMF_MAP[digit] || { flow: "unknown", msg: `Key ${digit} not recognised. Press 0 for main menu.` };
+    if (SESSIONS[body.session_id]) {
+      SESSIONS[body.session_id].flow = mapped.flow;
+      SESSIONS[body.session_id].history.push(`dtmf_${digit}`);
+    }
+    return {
+      session_id: body.session_id,
+      digit,
+      flow: mapped.flow,
+      valid: !!DTMF_MAP[digit],
+      message: mapped.msg,
+      tts_text: mapped.msg,
+    };
+  },
+
+  "POST /ivr/pnr": (body) => {
+    const pnr = String(body.pnr_number || "").trim();
+    if (!PNR_DB[pnr]) {
+      return {
+        session_id: body.session_id, pnr, status: "NOT_FOUND",
+        message: `PNR ${pnr} not found in the system. Please verify the number and try again.`,
+        tts_text: `PNR was not found. Please check the number and try again.`,
+      };
+    }
+    const d = PNR_DB[pnr];
+    const isConfirmed = d.status === "CONFIRMED";
+    const isRAC = d.status.startsWith("RAC");
+    let message = `PNR ${pnr} — Status: ${d.status}. Train ${d.train_number} ${d.train_name}. `;
+    let tts = `Your PNR status is ${d.status}. Train ${d.train_name}. `;
+    if (isConfirmed || isRAC) {
+      message += `Coach ${d.coach}, Berth ${d.berth_number} ${d.berth_type}. Platform ${d.platform}. Departs at ${d.departure}.`;
+      tts += `Coach ${d.coach}, Berth ${d.berth_number} ${d.berth_type}. Platform ${d.platform}. Departure at ${d.departure}.`;
+    } else {
+      message += "Waitlisted. Please check closer to departure for confirmation.";
+      tts += "You are on the waiting list. Please check closer to the travel date.";
+    }
+    return { session_id: body.session_id, pnr, ...d, message, tts_text: tts };
+  },
+
+  "POST /ivr/booking": (body) => {
+    const sid = body.session_id;
+    const hashBase = sid ? sid.split('').reduce((a,c)=>a+c.charCodeAt(0),0) : 1234;
+    const bookingId = `BK-2026-${body.from_station}-${body.to_station}-${(hashBase % 9000) + 1000}`;
+    const key = `${(body.from_station||'').toUpperCase()}-${(body.to_station||'').toUpperCase()}`;
+    const fareRow = FARE_TABLE[key] || {};
+    const cls = (body.travel_class || 'SL').toUpperCase();
+    const fare = fareRow[cls] || 999;
+    const CLASS_NAMES = { SL:"Sleeper", "3A":"3rd AC", "2A":"2nd AC", "1A":"1st AC", CC:"Chair Car" };
+    const QUOTA_NAMES = { GN:"General", TQ:"Tatkal", LD:"Ladies", HP:"Handicapped", FT:"Foreign Tourist" };
+    const clsName = CLASS_NAMES[cls] || cls;
+    const quotaName = QUOTA_NAMES[(body.quota||'GN').toUpperCase()] || body.quota;
+    const train = TRAIN_DB[body.train_number] || {};
+    const trainName = train.name || `Train ${body.train_number}`;
+    return {
+      session_id: sid, booking_id: bookingId,
+      train: `${body.train_number} ${trainName}`,
+      from: body.from_station, to: body.to_station,
+      class: `${cls} — ${clsName}`, quota: `${body.quota||'GN'} — ${quotaName}`,
+      berth_preference: body.berth_preference || "No Preference",
+      fare, availability: "AVAILABLE — 43 seats",
+      payment_link: `https://pay.irctc.co.in/${bookingId}`,
+      valid_until: new Date(Date.now() + 15*60*1000).toISOString(),
+      message: `Booking initiated. Train ${body.train_number} from ${body.from_station} to ${body.to_station}. ${clsName} class, ₹${fare}. Pay within 15 minutes.`,
+      tts_text: `Booking ready. ${clsName} class. Fare ${fare} rupees. Complete payment within 15 minutes.`,
+    };
+  },
+
+  "POST /ivr/tatkal": (body) => {
+    const now = istNow();
+    const h = now.getHours();
+    const windowOpen = h >= 10 && h < 23;
+    if (!windowOpen) {
+      return {
+        session_id: body.session_id, window_open: false,
+        message: `Tatkal booking is not available right now. Window opens at 10:00 AM IST.`,
+        tts_text: "Tatkal booking window is currently closed. It opens at 10 AM every day.",
+      };
+    }
+    const hashBase = (body.session_id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0) || 5678;
+    const tatkalRef = `TK-2026-${(hashBase % 9000) + 1000}-${body.from_station || 'NDLS'}`;
+    const cls = (body.travel_class || '3A').toUpperCase();
+    const BASE_FARES = { SL:735, "3A":1985, "2A":2865, "1A":4785, CC:500 };
+    const baseFare = BASE_FARES[cls] || 999;
+    const surcharge = TATKAL_SURCHARGE[cls] || 200;
+    const total = baseFare + surcharge;
+    const urgency = Math.min(99, 60 + (h - 10) * 4);
+    const queuePos = Math.max(1, 15 - (h - 10) * 2);
+    return {
+      session_id: body.session_id, tatkal_ref: tatkalRef,
+      status: `QUEUE_POSITION_${queuePos}`,
+      fare: baseFare, tatkal_surcharge: surcharge, total_fare: total,
+      urgency_score: urgency, window_open: true,
+      window_closes: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 0, 0).toISOString(),
+      message: `Tatkal booking queued. Position ${queuePos}. ${cls} class. Fare ₹${total} (including ₹${surcharge} surcharge). Window closes at 11 PM.`,
+      tts_text: `Tatkal booking initiated. Queue position ${queuePos}. Total fare ${total} rupees. Complete payment to confirm.`,
+    };
+  },
+
+  "POST /ivr/tracking": (body) => {
+    const tn = String(body.train_number || "").trim();
+    if (!TRAIN_DB[tn]) {
+      return {
+        session_id: body.session_id, train_number: tn, status: "NOT_FOUND",
+        message: `Train ${tn} not found. Please check the number and try again.`,
+        tts_text: `Train ${tn} was not found.`,
+      };
+    }
+    const t = TRAIN_DB[tn];
+    const delayMsg = t.delay_minutes > 0 ? ` Delayed by ${t.delay_minutes} minutes` : " Running on time";
+    const delayReason = t.delay_reason ? ` due to ${t.delay_reason}` : "";
+    return {
+      session_id: body.session_id, train_number: tn, ...t,
+      message: `Train ${tn} is at ${t.current_station}.${delayMsg}${delayReason}. Next station: ${t.next_station}. ETA destination: ${t.eta_destination}.`,
+      tts_text: `Train ${tn} ${t.name} is currently at ${t.current_station}.${delayMsg}. Expected arrival at ${t.eta_destination}.`,
+    };
+  },
+
+  "POST /acs/bridge": (body) => {
+    const transcript = (body.speech_transcript || "").toLowerCase();
+    let intent = "unknown", entities = {}, confidence = 0.5, dialogue_state = "idle";
+    if (["pnr","status","ticket","confirm"].some(w => transcript.includes(w))) {
+      intent = "pnr_status"; confidence = 0.92; dialogue_state = "pnr_lookup";
+      const digits = transcript.replace(/\D/g,"");
+      if (digits.length === 10) entities.pnr = digits;
+    } else if (["book","reserve"].some(w => transcript.includes(w))) {
+      intent = "book_ticket"; confidence = 0.88; dialogue_state = "collect_booking_details";
+    } else if (["track","where","location","running"].some(w => transcript.includes(w))) {
+      intent = "train_tracking"; confidence = 0.91; dialogue_state = "tracking";
+    } else if (["tatkal","urgent","emergency"].some(w => transcript.includes(w))) {
+      intent = "tatkal_booking"; confidence = 0.94; dialogue_state = "tatkal_flow";
+    }
+    return {
+      acs_action: "play_tts", tts_text: body.tts_text || "How can I help you?",
+      voice: "en-IN-NeerjaNeural", next_event: "collect_input",
+      session_id: body.session_id,
+      bap_payload: { intent, entities, confidence, dialogue_state },
+    };
+  },
+
+  "GET /session/": (sid) => SESSIONS[sid] || { error: "Session not found" },
+};
+
+// ── Simulated API dispatcher (mirrors fetch() interface) ──────────────────────
+async function mockFetch(method, path, body = null) {
+  await new Promise(r => setTimeout(r, 80 + Math.random() * 120)); // simulate latency
+  const key = `${method} ${path}`;
+
+  // Special cases
+  if (path.startsWith("/session/")) {
+    const sid = path.replace("/session/", "");
+    return mockAPI["GET /session/"](sid);
+  }
+
+  const handler = mockAPI[key];
+  if (!handler) return { error: `No mock for ${key}` };
+  return handler(body || {});
+}
+
+// ── UI State ──────────────────────────────────────────────────────────────────
 let sessionId = null;
 let apiCallCount = 0;
 
-// ── Health Check ─────────────────────────────────────────────────────────────
-async function checkHealth() {
-  try {
-    const r = await fetch(BASE + '/health');
-    const d = await r.json();
-    const badge = document.getElementById('health-badge');
-    if (d.status === 'healthy') {
-      badge.textContent = '✅ Server Online';
-      badge.className = 'ok';
-      document.getElementById('stat-server').textContent = 'Online';
-    }
-  } catch {
-    const badge = document.getElementById('health-badge');
-    badge.textContent = '❌ Server Offline';
-    badge.className = 'fail';
-    document.getElementById('stat-server').textContent = 'Offline';
-  }
+function checkHealth() {
+  const d = mockAPI["GET /health"]();
+  const badge = document.getElementById('health-badge');
+  badge.textContent = '✅ Mock Server Online';
+  badge.className = 'ok';
+  document.getElementById('stat-server').textContent = 'Mock (Online)';
+  showJSON(d);
 }
 checkHealth();
 setInterval(checkHealth, 10000);
 
-// ── Logging ───────────────────────────────────────────────────────────────────
 function log(msg, type = 'info') {
-  const log = document.getElementById('call-log');
+  const logEl = document.getElementById('call-log');
   const d = document.createElement('div');
   d.className = 'log-entry ' + type;
   const t = new Date().toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
   d.innerHTML = `<div class="log-time">${t}</div><div>${msg}</div>`;
-  log.appendChild(d);
-  log.scrollTop = log.scrollHeight;
+  logEl.appendChild(d);
+  logEl.scrollTop = logEl.scrollHeight;
 }
 
 function showJSON(obj) {
@@ -239,7 +505,6 @@ function addAPIHistory(method, path, ok) {
   document.getElementById('stat-calls').textContent = ++apiCallCount;
 }
 
-// ── Step Tracker ──────────────────────────────────────────────────────────────
 function setStep(index) {
   const steps = document.getElementById('flow-steps').children;
   for (let i = 0; i < steps.length; i++) {
@@ -249,18 +514,14 @@ function setStep(index) {
   }
 }
 
-// ── API Helper ────────────────────────────────────────────────────────────────
 async function api(method, path, body = null) {
   try {
-    const opts = { method, headers: {'Content-Type':'application/json'} };
-    if (body) opts.body = JSON.stringify(body);
-    const r = await fetch(BASE + path, opts);
-    const d = await r.json();
+    const d = await mockFetch(method, path, body);
     showJSON(d);
-    addAPIHistory(method, path, r.ok);
+    addAPIHistory(method, path, !d.error);
     return d;
   } catch (e) {
-    log(`❌ Network error: ${e.message}`, 'error');
+    log(`❌ Mock error: ${e.message}`, 'error');
     addAPIHistory(method, path, false);
     return null;
   }
@@ -273,7 +534,7 @@ async function startCall() {
   const d = await api('POST', '/ivr/start', { caller_id: '+91-9999999999', language: 'en' });
   if (!d) return;
   sessionId = d.session_id;
-  document.getElementById('stat-session').textContent = sessionId.slice(0, 8) + '...';
+  document.getElementById('stat-session').textContent = sessionId.slice(0,8) + '...';
   document.getElementById('stat-flow').textContent = 'main_menu';
   log(`✅ Session started: ${sessionId.slice(0,8)}...`, 'success');
   log(`🔊 ${d.message}`, 'info');
@@ -308,7 +569,7 @@ async function checkPNR() {
   log(`🔍 Looking up PNR: ${pnr}`, 'info');
   const d = await api('POST', '/ivr/pnr', { session_id: sessionId, pnr_number: pnr });
   if (!d) return;
-  const badge = d.status === 'CONFIRMED' ? '✅' : d.status.startsWith('RAC') ? '🟡' : '❌';
+  const badge = d.status === 'CONFIRMED' ? '✅' : d.status && d.status.startsWith('RAC') ? '🟡' : '❌';
   log(`${badge} ${d.message}`, d.status === 'CONFIRMED' ? 'success' : 'warn');
   setStep(5);
 }
