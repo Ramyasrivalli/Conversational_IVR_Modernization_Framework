@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-green.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-teal.svg)](https://fastapi.tiangolo.com)
 [![M3 Live Demo](https://img.shields.io/badge/M3%20Demo-Replit-orange.svg)](https://ticket-assistant--24b01a4278.replit.app)
-[![M2 Live Demo](https://img.shields.io/badge/M2%20Demo-Claude-blueviolet.svg)](https://claude.ai/public/artifacts/6f11325f-8531-487e-a886-fdbf6ae76559)
+[![M2 Live Demo](https://img.shields.io/badge/M2%20Demo-Claude-blueviolet.svg)](https://claude.ai/public/artifacts/7314443d-8b04-4358-91c7-a0475344d02b)
 
 ---
 
@@ -556,7 +556,7 @@ Full request/response examples with JSON: see **[Milestone_2/README_M2.md](Miles
 | Milestone | Status | Demo | Description |
 |-----------|--------|------|-------------|
 | **M1** — Legacy Analysis | ✅ Complete | — | IRCTC IVR architecture review, integration requirements, 6-phase plan |
-| **M2** — Integration Layer | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/f48dc9c9-b01f-4a47-9e79-2a1ce3ff5d32) | FastAPI backend (8 endpoints) + DTMF web simulator |
+| **M2** — Integration Layer | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/7314443d-8b04-4358-91c7-a0475344d02b) | FastAPI backend (8 endpoints) + DTMF web simulator |
 | **M3** — Conversational AI | ✅ Complete | [▶ Live Demo](https://claude.ai/public/artifacts/fff2ac45-175f-4f33-a2d7-98ea57441ad5) | Voice + NLU + TTS browser simulator — zero cost, zero backend |
 | **M4** — Testing & Deployment | ✅ Complete | — | 30+ tests (unit/integration/E2E/load/error) + deployment guide |
 
